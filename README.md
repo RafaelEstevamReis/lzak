@@ -1,6 +1,6 @@
 # L'zack Laser CNC
 
-The goal for this project is to create a firmware for CNC machines as a final project, required for my school graduation. The ,a
+The goal for this project is to create two-piece software suite for CNC machines as a final project, required for my school graduation. It is composed by the firmware and the host software.
 
 ------
 - [L'zack Laser CNC](#lzack-laser-cnc)
@@ -29,7 +29,7 @@ The goal for this project is to create a firmware for CNC machines as a final pr
 
 The solution hence put forth is a CNC software suite. It aims to manipulate a CNC machine via GCODE¹ specifications.
 
-It is a three-piece *software*, namely, 1) the firmware itself for arduinos, 2) the Fast Testing (FTS) Suite, an CNC hardware emulator for easy testing and a 3) multi-platform .NET host software, which will be responsible for sending commands to the firmware.
+It is a three-piece *software*, namely, 1) the firmware itself for ATMega (ache), 2) the Fast Testing Suite (FTS), an CNC hardware emulator for ease of testing and a 3) multi-platform .NET host software, which will be responsible for sending commands to the firmware.
 
 It'll be ready right when it'll be ready.
 
@@ -44,8 +44,8 @@ At this time any collaboration is limited
 
 ## Glossary
 
-* `CNC`: Originally, *Computer-Generated Code*; currently it refers to machines capable of receiving commands from a computer to manufacture physical objects through automated machines.
-* `GCODE`: Accronym for *Geometric Code*; also known as RS-274), it's a set of instructions widely used as CNC programming language. Basically, a GCODE instructions script contains positional commands which the firmware can read and instruct the machine to reposition itself.
+* `CNC`: Originally, *Computer Numerical Control*; currently it refers to machines capable of receiving commands from a computer to manufacture physical objects through automated machines.
+* `GCODE`: Accronym for *Geometric Code* (also known as RS-274), it's a set of instructions widely used as CNC programming language. Basically, a GCODE instructions script contains positional commands which the firmware can read and instruct the machine to reprogram*********** itself.
 * `Firmware`: it's a low-level computer software that works by manipulating instructions for a specific hardware in order to provide a standard operating environment. In some cases, it works as a basic software to which all subsequent software refer to; in others - as in our case - it'll work as the complete operating system.
 * `Host`: will do this one later
 * `mcco`: its a small computer, 
