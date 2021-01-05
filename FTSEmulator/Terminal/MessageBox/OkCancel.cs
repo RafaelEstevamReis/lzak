@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Terminal;
 
 namespace Terminal.MessageBox
 {
@@ -11,10 +8,10 @@ namespace Terminal.MessageBox
 
         private OkCancel() { }
 
-        public static void Show(string Title, string Contents, string OkText = null, string CancelText = null)
+        public static DialogResult Show(string Title, string Contents, string OkText = null, string CancelText = null)
         {
             var msg = new OkCancel();
-            msg.Draw(Title, Contents, OkText, CancelText);
+            return msg.Draw(Title, Contents, OkText, CancelText);
         }
 
         public DialogResult Draw(string Title, string Contents)
