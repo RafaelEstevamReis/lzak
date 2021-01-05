@@ -1,4 +1,7 @@
 ﻿using System;
+using Terminal;
+using System.Drawing;
+using Terminal.MessageBox;
 
 namespace FTS.UI
 {
@@ -6,7 +9,7 @@ namespace FTS.UI
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            OkCancel.Show("Teste", "Teste", "A", "b");
         }
     }
 }
