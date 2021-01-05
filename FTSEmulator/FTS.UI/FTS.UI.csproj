@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FTS.Core\FTS.Core.csproj" />
     <ProjectReference Include="..\Terminal\Terminal.csproj" />
   </ItemGroup>
 
