@@ -1,14 +1,17 @@
 ﻿namespace FTS.Core
 {
-    public class Cunfiguration
+    public class Configuration
     {
-        public static Cunfiguration Instance { get; } = new Cunfiguration();
-
+        public static Configuration Instance { get; } = new Configuration();
+        
         public PointF WorkspaceMM { get; }
         // [0,0] is at Lower Left Corner!
 
-        private Cunfiguration()
+        public float StepSizeMM { get; set; }
+
+        private Configuration()
         {
+            StepSizeMM = 2;
             WorkspaceMM = new PointF()
             {
                 X = 100,

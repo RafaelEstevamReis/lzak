@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FTS.Core\FTS.Core.csproj" />
-    <ProjectReference Include="..\Terminal\Terminal.csproj" />
+    <ProjectReference Include="..\FTS.Serial\FTS.Serial.csproj" />
   </ItemGroup>
 
 </Project>
