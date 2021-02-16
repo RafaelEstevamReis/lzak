@@ -12,13 +12,18 @@
 #define R1_P 4
 #define R2_P 5
 
+#define ENDSTOP_THRESHOLD 300
+
 #define QTD_LEDS 6
-int  pins[QTD_LEDS] =   { 16, 5, 4, 0, 2, 14 };
+//int  pins[QTD_LEDS] =   { 16, 5, 4, 0, 2, 14 }; // NodeMCU
+int  pins[QTD_LEDS] =   { 9, 8, 7, 6, 5, 4 }; // arduino de vdd
 
 bool values[QTD_LEDS];
 
 void setup() 
 {
+  pinMode(A3, INPUT);
+  
   for(int i = 0; i < QTD_LEDS;i++)
   {
     pinMode(pins[i], OUTPUT);
@@ -30,6 +35,18 @@ void setup()
 
 void loop() 
 {
+  while(true)
+  {
+   // Switch do endstop
+   int endStopValue = analogRead(A3);
+   
+   if(endStopValue < ENDSTOP_THRESHOLD) 
+   {
+      Serial.println((String)"STOP(" + endStopValue + ")");
+      
+      continue;
+   }
+   
   if(Serial.available() > 0)
   {
     int received = Serial.read();
@@ -63,4 +80,5 @@ void loop()
   
   //Serial.print();
   delayMicroseconds(50);
+  }
 }

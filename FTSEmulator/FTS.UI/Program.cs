@@ -15,7 +15,6 @@ PointI myLastDrawX = new PointI();
 
 updateAsync();
 
-
 // Início
 Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
 
@@ -83,7 +82,6 @@ void move(float X, float Y)
     if (Memory.Instance.Alarm || Memory.Instance.Emergency) return;
 
     int babySize = (int)Math.Ceiling(Math.Sqrt(X * X + Y * Y) / stepSizeMM);
-    babySize = babySize;
 
     Memory.Instance.Moving = true;
     float babyX = (float)Math.Round(X / babySize, 2);
@@ -171,7 +169,7 @@ void draw()
     Console.Write("X");
 
     Console.SetCursorPosition(0, 25);
-    if(mem.Idle) Console.Write("[IDLE]");
+    if (mem.Idle) Console.Write("[IDLE]");
     else Console.Write("[----]");
 
     Console.SetCursorPosition(10, 25);

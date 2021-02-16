@@ -22,7 +22,6 @@
         {
             PositionMM = new PointF();
             FeedRateMmPerMinute = new PointF();
-
         }
 
         public void SetAlarm(AlarmReasons reason)
@@ -30,6 +29,7 @@
             Alarm = true;
             AlarmReason = reason;
         }
+
         public void ClearAlarm()
         {
             Alarm = false;

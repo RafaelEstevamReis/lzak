@@ -20,7 +20,7 @@ namespace Serial
         {
             Console.CursorVisible = false;
 
-            SerialPort sp = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
+            SerialPort sp = new SerialPort("COM4", 9600, Parity.None, 8, StopBits.One);
             Console.WriteLine($"Abrindo {sp.PortName}..");
             while (true)
             {
@@ -85,7 +85,7 @@ namespace Serial
                 {
                     for (int i = 0; ; i++)
                     {
-                        await Task.Delay(20);
+                        await Task.Delay(1);
                         sw.Write((byte)(1 << (i % 6)));
 
                         if (!Console.KeyAvailable) continue;
