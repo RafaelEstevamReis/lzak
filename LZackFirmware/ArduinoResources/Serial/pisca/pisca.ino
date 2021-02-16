@@ -12,8 +12,7 @@
 #define R1_P 4
 #define R2_P 5
 
-#define ENDSTOP_THRESHOLD 300
-
+#define ENDSTOP_THRESHOLD 500
 #define QTD_LEDS 6
 //int  pins[QTD_LEDS] =   { 16, 5, 4, 0, 2, 14 }; // NodeMCU
 int  pins[QTD_LEDS] =   { 9, 8, 7, 6, 5, 4 }; // arduino de vdd
@@ -22,7 +21,7 @@ bool values[QTD_LEDS];
 
 void setup() 
 {
-  pinMode(A3, INPUT);
+  pinMode(A3, INPUT_PULLUP);
   
   for(int i = 0; i < QTD_LEDS;i++)
   {
@@ -43,7 +42,6 @@ void loop()
    if(endStopValue < ENDSTOP_THRESHOLD) 
    {
       Serial.println((String)"STOP(" + endStopValue + ")");
-      
       continue;
    }
    
