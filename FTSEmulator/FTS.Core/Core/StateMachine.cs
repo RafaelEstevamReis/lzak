@@ -14,7 +14,7 @@ namespace FTS.Core
         private static void Serial_ConnectSuccessfull(SerialConnectEventArgs e)
         {
             Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write(new string(' ', 32));
+            Console.Write(new string(' ', 50));
             Console.SetCursorPosition(62, Console.CursorTop);
             Console.Write($"Connected on {Serial.Serial.PortName}!");
         }
@@ -22,7 +22,7 @@ namespace FTS.Core
         private static void Serial_ConnectFailure(SerialConnectEventArgs e)
         {
             Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write(new string(' ', 32));
+            Console.Write(new string(' ', 50));
             Console.SetCursorPosition(62, Console.CursorTop);
             Console.Write($"Failed connecting. Message: {e.Exception.Message}.");
         }
@@ -30,7 +30,7 @@ namespace FTS.Core
         private static void Serial_TryConnect(SerialConnectEventArgs e)
         {
             Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write(new string(' ', 32));
+            Console.Write(new string(' ', 50));
             Console.SetCursorPosition(62, Console.CursorTop);
             Console.Write($"Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...");
         }
