@@ -35,11 +35,9 @@ namespace FTS.Core
         {
             // Conectar ao arduino.
             // tem um retorno em bool e um eventos dizendo o status.
-            var t = connect();
-            t.Wait();
-            return IsOpen = t.Result;
+            return IsOpen = connect();
         }
-        private async Task<bool> connect()
+        private bool connect()
         {
             int currentTry = 1;
 
@@ -54,7 +52,7 @@ namespace FTS.Core
                 }
                 catch (Exception ex)
                 {
-                    await Task.Delay(1000);
+                    Thread.Sleep(1000);
                     currentTry++;
                     if (currentTry == Config.SerialMaxCnnTries)
                     {
@@ -84,7 +82,7 @@ namespace FTS.Core
                 }
             }
         }
-        public async void Listen()
+        public async void ListenAsync()
         {
             using var sr = new BinaryReader(Serial.BaseStream, encoding: Encoding.ASCII);
 

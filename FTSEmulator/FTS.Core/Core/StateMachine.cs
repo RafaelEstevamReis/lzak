@@ -52,7 +52,7 @@ namespace FTS.Core
             if (!Serial.Open()) throw new Exception(
                 $"Serial on {Configuration.Instance.SerialCOMPort} disconnected, cannot proceed.");
 
-            Task.Run(() => Serial.Listen());
+            Task.Run(() => Serial.ListenAsync());
             //Task.Run(() => Serial.Move());
 
             Console.CursorVisible = false;

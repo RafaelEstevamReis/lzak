@@ -16,7 +16,7 @@ namespace FTS.Core
         // mock serial class, for testing
         public void Move(/*byte Command*/) { }
         public bool Open() => true;
-        public void Listen() 
+        public void ListenAsync() 
         {
             TryConnect?.Invoke(new SerialConnectEventArgs());
             ConnectSuccessful?.Invoke(new SerialConnectEventArgs());
