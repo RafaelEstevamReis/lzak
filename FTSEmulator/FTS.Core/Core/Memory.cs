@@ -1,4 +1,6 @@
-﻿namespace FTS.Core
+﻿using System;
+
+namespace FTS.Core
 {
     public partial class Memory
     {
@@ -15,7 +17,7 @@
         public bool Alarm { get; set; }
         public AlarmReasons AlarmReason { get; set; }
         
-        public bool Emergency { get; }
+        public bool Emergency { get; set; }
         public EmergencyReasons EmergencyReason { get; set; }
 
         private Memory()
@@ -29,10 +31,13 @@
             Alarm = true;
             AlarmReason = reason;
         }
-
-        public void ClearAlarm()
+        public void SetEmergency(EmergencyReasons reason)
         {
-            Alarm = false;
+            Emergency = true;
+            EmergencyReason = reason;
         }
+
+        public void ClearAlarm() => Alarm = false;
+        internal void ClearEmergency() => Emergency = false;
     }
 }
