@@ -5,11 +5,13 @@ namespace FTS.Core
 {
     public class Movement
     {
-        private Configuration config;
+        Configuration config;
+        ISerial Serial;
 
-        public Movement()
+        public Movement(ISerial Serial)
         {
             config = Configuration.Instance;
+            this.Serial = Serial;
         }
 
         public void MoveTo(float X, float Y)
