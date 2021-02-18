@@ -69,19 +69,38 @@ namespace FTS.Core
             else return false;
         }
         // Blink por enquanto
-        public void Move(/*byte Command*/)
+        public void Move(Step step)
         {
-            using var sw = new BinaryWriter(Serial.BaseStream);
+            using var bw = new BinaryWriter(Serial.BaseStream);
 
-            while (true)
-            {
-                for (int i = 0; ; i++)
-                {
-                    sw.Write((byte)(1 << (i % 6)));
-                    Thread.Sleep(50);
-                }
-            }
+            // if(step == Step.StepLeft) moveStepperMotor(bw, 
+
+            // concept blinking art
+            //while (true)
+            //{
+            //    for (int i = 0; ; i++)
+            //    {
+            //        sw.Write((byte)(1 << (i % 6)));
+            //        Thread.Sleep(50);
+            //    }
+            //}
         }
+
+        private static void moveStepperMotor(BinaryWriter bw, params Step[] Steps)
+        {
+            if (Steps.Length != 3) throw new ArgumentException("Not enough steps provided.");
+
+            byte bX = (byte)Steps[0];
+            byte bY = (byte)Steps[1];
+            byte bZ = (byte)Steps[2];
+
+            var b = (bX << 4) +
+                    (bY << 2) +
+                     bZ;
+
+            bw.Write((byte)b);
+        }
+
         public async void ListenAsync()
         {
             using var sr = new BinaryReader(Serial.BaseStream, encoding: Encoding.ASCII);
