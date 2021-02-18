@@ -6,7 +6,7 @@ namespace FTS.UI
     {
         public static void Main(string[] args)
         {
-            StatesMachine.Run();
+            StateMachine.Run(new MockSerialComms());
         }
     }
 }
