@@ -2,6 +2,6 @@
 {
     public enum EmergencyReasons
     {
-
+        ENDSTOPActivated = 101
     }
 }
