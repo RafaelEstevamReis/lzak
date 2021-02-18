@@ -1,36 +1,50 @@
 ﻿using System;
+using System.IO.Ports;
 
 namespace FTS.Core
 {
-    public delegate void OnTryConnect(SerialEventArgs e);
-    public delegate void OnConnectSuccessfull(SerialEventArgs e);
-    public delegate void OnConnectFailure(SerialEventArgs e);
+    public delegate void OnTryConnect(SerialConnectEventArgs e);
+    public delegate void OnConnectSuccessful(SerialConnectEventArgs e);
+    public delegate void OnConnectFailure(SerialConnectEventArgs e);
 
-    public class SerialEventArgs
+    public delegate void OnEngravingToggle(SerialCallBackEventArgs e);
+
+    public class SerialConnectEventArgs
     {
         public int CurrentTry { get; set; }
         public bool LastTry { get; set; }
         public Exception Exception { get; set; }
 
-        public SerialEventArgs(bool LastTry = false) => this.LastTry = LastTry;
-        public SerialEventArgs(int CurrentTry) => this.CurrentTry = CurrentTry;
-        public SerialEventArgs(Exception Exception) => this.Exception = Exception;
-        public SerialEventArgs(Exception Exception, bool LastTry = false)
+        public SerialConnectEventArgs(bool LastTry = false) => this.LastTry = LastTry;
+        public SerialConnectEventArgs(int CurrentTry) => this.CurrentTry = CurrentTry;
+        public SerialConnectEventArgs(Exception Exception) => this.Exception = Exception;
+        public SerialConnectEventArgs(Exception Exception, bool LastTry = false)
         {
             this.Exception = Exception;
             this.LastTry = LastTry;
         }
     }
 
+    public class SerialCallBackEventArgs
+    {
+        public bool ENDSTOPActivated { get; set; }
+        public SerialCallBackEventArgs(bool ENDSTOPActivated) => this.ENDSTOPActivated = ENDSTOPActivated;
+    }
+
     public interface ISerial
     {
         public event OnTryConnect TryConnect;
-        public event OnConnectSuccessfull ConnectSuccessfull;
+        public event OnConnectSuccessful ConnectSuccessful;
         public event OnConnectFailure ConnectFailure;
 
-        public bool IsOpen { get; set; }
+        public event OnEngravingToggle EngravingToggle;
+
+        public SerialPort Serial { get; }
+
+        public bool IsOpen { get; }
 
         public bool Open();
-        public void Move(byte Command);
+        public void Move(/*byte Command*/);
+        void Listen();
     }
 }
