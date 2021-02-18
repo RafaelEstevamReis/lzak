@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTS.UI", "FTS.UI\FTS.UI.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTS.Core", "FTS.Core\FTS.Core.csproj", "{6417C73E-6D37-444E-AE82-8E778B58006B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTS.Serial", "FTS.Serial\FTS.Serial.csproj", "{FA726EEC-B6F4-4EA6-B336-DE223AA6A1E9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{6417C73E-6D37-444E-AE82-8E778B58006B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6417C73E-6D37-444E-AE82-8E778B58006B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6417C73E-6D37-444E-AE82-8E778B58006B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FA726EEC-B6F4-4EA6-B336-DE223AA6A1E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA726EEC-B6F4-4EA6-B336-DE223AA6A1E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FA726EEC-B6F4-4EA6-B336-DE223AA6A1E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA726EEC-B6F4-4EA6-B336-DE223AA6A1E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

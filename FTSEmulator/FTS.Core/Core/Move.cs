@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace FTS.Core
 {
@@ -11,9 +7,9 @@ namespace FTS.Core
     {
         private Configuration config;
 
-        public Movement(Configuration config)
+        public Movement()
         {
-            this.config = config;
+            config = Configuration.Instance;
         }
 
         public void MoveTo(float X, float Y)

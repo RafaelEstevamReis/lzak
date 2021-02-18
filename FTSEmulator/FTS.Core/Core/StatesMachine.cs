@@ -9,9 +9,47 @@ namespace FTS.Core
     {
         static bool SuspendDraw = false;
         static CancellationTokenSource CancellationSource = new();
+        static ISerial Serial;
 
-        public static void Run()
+        private async static void Serial_ConnectSuccessfull(SerialEventArgs e)
         {
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', 60));
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write($" Connected!");
+            await Task.Delay(1000);
+            Console.SetCursorPosition(0, 0);
+            Console.Write(new string(' ', 60));
+        }
+
+        private static void Serial_ConnectFailure(SerialEventArgs e)
+        {
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', 60));
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write($"Failed connecting. Message: {e.Exception.Message}.");
+        }
+
+        private static void Serial_TryConnect(SerialEventArgs e)
+        {
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', 60));
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write($"Trying to connect ({e.CurrentTry})...");
+        }
+
+        public static void Run(ISerial serial = null)
+        {
+            Serial = serial;
+            if (Serial == null) Serial = new SerialComms();
+            Serial.TryConnect += Serial_TryConnect;
+            Serial.ConnectFailure += Serial_ConnectFailure;
+            Serial.ConnectSuccessfull += Serial_ConnectSuccessfull;
+            Serial.Open();
+
+            if (!Serial.IsOpen) throw new Exception(
+                $"Serial on {Configuration.Instance.SerialCOMPort} disconnected, cannot proceed.");
+
             Console.CursorVisible = false;
             var tk = CancellationSource.Token;
             PointI myLastDrawX = new PointI();
@@ -19,10 +57,9 @@ namespace FTS.Core
             // mantém a interface atualizando
             updateAsync();
 
-            // Início
+            // Início: não sei onde estão os motores.
             Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
-
-            Movement movement = new(Configuration.Instance);
+            Movement movement = new();
 
             while (!tk.IsCancellationRequested)
             {
@@ -184,7 +221,5 @@ namespace FTS.Core
                 catch { }
             }
         }
-
-        
     }
 }
