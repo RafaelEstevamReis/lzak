@@ -1,19 +1,24 @@
 ﻿using System;
+using System.IO;
 using System.IO.Ports;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FTS.Core
 {
     public class SerialComms : ISerial
     {
-        SerialPort Serial;
+        public SerialPort Serial { get; }
         Configuration Config;
         public bool IsOpen { get; set; }
 
         public event OnTryConnect TryConnect;
-        public event OnConnectSuccessfull ConnectSuccessfull;
+        public event OnConnectSuccessful ConnectSuccessful;
         public event OnConnectFailure ConnectFailure;
 
+        public event OnEngravingToggle EngravingToggle;
+        
         public SerialComms()
         {
             Config = Configuration.Instance;
@@ -26,7 +31,6 @@ namespace FTS.Core
                                     Config.SerialDataBits,
                                     Config.SerialStopBits);
         }
-
         public bool Open()
         {
             // Conectar ao arduino.
@@ -35,7 +39,6 @@ namespace FTS.Core
             t.Wait();
             return IsOpen = t.Result;
         }
-
         private async Task<bool> connect()
         {
             int currentTry = 1;
@@ -44,9 +47,9 @@ namespace FTS.Core
             {
                 try
                 {
-                    TryConnect?.Invoke(new SerialEventArgs(currentTry));
+                    TryConnect?.Invoke(new SerialConnectEventArgs(currentTry));
                     Serial.Open();
-                    ConnectSuccessfull?.Invoke(new SerialEventArgs());
+                    ConnectSuccessful?.Invoke(new SerialConnectEventArgs());
                     break;
                 }
                 catch (Exception ex)
@@ -55,11 +58,11 @@ namespace FTS.Core
                     currentTry++;
                     if (currentTry == Config.SerialMaxCnnTries)
                     {
-                        ConnectFailure?.Invoke(new SerialEventArgs(ex, true));
+                        ConnectFailure?.Invoke(new SerialConnectEventArgs(ex, true));
                     }
                     else
                     {
-                        ConnectFailure?.Invoke(new SerialEventArgs(ex));
+                        ConnectFailure?.Invoke(new SerialConnectEventArgs(ex));
                     }
                 }
             } while (currentTry < Config.SerialMaxCnnTries);
@@ -67,11 +70,43 @@ namespace FTS.Core
             if (Serial.IsOpen) return true;
             else return false;
         }
-
         // Blink por enquanto
-        public void Move(byte Command)
+        public void Move(/*byte Command*/)
         {
+            using var sw = new BinaryWriter(Serial.BaseStream);
 
+            while (true)
+            {
+                for (int i = 0; ; i++)
+                {
+                    sw.Write((byte)(1 << (i % 6)));
+                    Thread.Sleep(50);
+                }
+            }
+        }
+        public async void Listen()
+        {
+            using var sr = new BinaryReader(Serial.BaseStream, encoding: Encoding.ASCII);
+
+            int len;
+            var buffer = new byte[512];
+
+            while (true)
+            {
+                await Task.Delay(10);
+                if ((len = sr.Read(buffer, 0, buffer.Length)) == 0) continue;
+
+                var dados = Encoding.ASCII.GetString(buffer, 0, len);
+
+                if (dados.Contains("STOP"))
+                {
+                    EngravingToggle?.Invoke(new SerialCallBackEventArgs(true));
+                }
+                else
+                {
+                    EngravingToggle?.Invoke(new SerialCallBackEventArgs(false));
+                }
+            }
         }
     }
 }
