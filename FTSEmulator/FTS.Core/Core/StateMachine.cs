@@ -5,37 +5,39 @@ using System.Threading.Tasks;
 
 namespace FTS.Core
 {
-    public class StatesMachine
+    public class StateMachine
     {
         static bool SuspendDraw = false;
         static CancellationTokenSource CancellationSource = new();
         static ISerial Serial;
 
-        private async static void Serial_ConnectSuccessfull(SerialEventArgs e)
+        private static void Serial_ConnectSuccessfull(SerialConnectEventArgs e)
         {
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new string(' ', 60));
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write($" Connected!");
-            await Task.Delay(1000);
-            Console.SetCursorPosition(0, 0);
-            Console.Write(new string(' ', 60));
+            Console.SetCursorPosition(62, Console.CursorTop);
+            Console.Write(new string(' ', 32));
+            Console.SetCursorPosition(62, Console.CursorTop);
+            Console.Write($"Connected on {Serial.Serial.PortName}!");
         }
 
-        private static void Serial_ConnectFailure(SerialEventArgs e)
+        private static void Serial_ConnectFailure(SerialConnectEventArgs e)
         {
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new string(' ', 60));
-            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.SetCursorPosition(62, Console.CursorTop);
+            Console.Write(new string(' ', 32));
+            Console.SetCursorPosition(62, Console.CursorTop);
             Console.Write($"Failed connecting. Message: {e.Exception.Message}.");
         }
 
-        private static void Serial_TryConnect(SerialEventArgs e)
+        private static void Serial_TryConnect(SerialConnectEventArgs e)
         {
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new string(' ', 60));
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write($"Trying to connect ({e.CurrentTry})...");
+            Console.SetCursorPosition(62, Console.CursorTop);
+            Console.Write(new string(' ', 32));
+            Console.SetCursorPosition(62, Console.CursorTop);
+            Console.Write($"Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...");
+        }
+
+        private static void Serial_EngravingToggle(SerialCallBackEventArgs e)
+        {
+            Memory.Instance.SetEmergency(EmergencyReasons.ENDSTOPActivated);
         }
 
         public static void Run(ISerial serial = null)
@@ -44,11 +46,14 @@ namespace FTS.Core
             if (Serial == null) Serial = new SerialComms();
             Serial.TryConnect += Serial_TryConnect;
             Serial.ConnectFailure += Serial_ConnectFailure;
-            Serial.ConnectSuccessfull += Serial_ConnectSuccessfull;
-            Serial.Open();
+            Serial.ConnectSuccessful += Serial_ConnectSuccessfull;
+            Serial.EngravingToggle += Serial_EngravingToggle;
 
-            if (!Serial.IsOpen) throw new Exception(
+            if (!Serial.Open()) throw new Exception(
                 $"Serial on {Configuration.Instance.SerialCOMPort} disconnected, cannot proceed.");
+
+            Task.Run(() => Serial.Listen());
+            //Task.Run(() => Serial.Move());
 
             Console.CursorVisible = false;
             var tk = CancellationSource.Token;
@@ -59,7 +64,7 @@ namespace FTS.Core
 
             // Início: não sei onde estão os motores.
             Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
-            Movement movement = new();
+            Movement movement = new(Serial);
 
             while (!tk.IsCancellationRequested)
             {
@@ -73,6 +78,9 @@ namespace FTS.Core
 
                     case ConsoleKey.A:
                         Memory.Instance.ClearAlarm();
+                        break;
+                    case ConsoleKey.E:
+                        Memory.Instance.ClearEmergency();
                         break;
                     case ConsoleKey.H:
                         Memory.Instance.PositionMM = new PointF(); // 0,0
@@ -99,21 +107,24 @@ namespace FTS.Core
                         break;
 
                     case ConsoleKey.Enter:
-                        Point destination = getCustomPointFromInput(); 
+                        Point destination = getCustomPointFromInput(out bool valid);
+                        if (!valid) continue;
                         movement.MoveTo(destination.X, destination.Y);
                         break;
                 }
             }
 
-            static Point getCustomPointFromInput()
+            static Point getCustomPointFromInput(out bool valid)
             {
                 SuspendDraw = true;
+                Thread.Sleep(100);
 
                 Console.CursorVisible = true;
                 Console.SetCursorPosition(0, 0);
                 Console.Write(new string(' ', 20));
                 Console.SetCursorPosition(0, 0);
-                
+
+                Console.Write("Go to (x:y): ");
                 var line = Console.ReadLine();
                 var parts = line.Split(':');
                 Console.CursorVisible = false;
@@ -122,10 +133,19 @@ namespace FTS.Core
                 Console.SetCursorPosition(0, 0);
                 Console.Write(new string(' ', 20));
                 Console.SetCursorPosition(0, 0);
+                try
+                {
+                    var p = new Point(Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1]));
+                    valid = true;
 
-                return new Point(Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1]));
+                    return p;
 
-                //throw new NotImplementedException("Faz essa parte.");
+                }
+                catch { valid = false; }
+
+                return new Point(0,0);
+
+                // melhorar este input
             }
 
             async void updateAsync()
