@@ -125,5 +125,10 @@ namespace FTS.Core
                 }
             }
         }
+
+        public void Move()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
