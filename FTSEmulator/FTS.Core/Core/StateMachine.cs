@@ -11,6 +11,8 @@ namespace FTS.Core
         static ISerial Serial;
         static object lockObj = new object();
 
+        #region Events
+        // Events!
         private static void Serial_ConnectSuccessfull(SerialConnectEventArgs e)
         {
             WriteOnConsole($"Connected on {Serial.Serial.PortName}!", new PointI(62, 0), 50);
@@ -26,6 +28,14 @@ namespace FTS.Core
             WriteOnConsole($"Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...", new PointI(62, 0), 50);
         }
 
+        private static void Serial_EngravingToggle(SerialCallBackEventArgs e)
+        {
+            Memory.Instance.SetEmergency(EmergencyReasons.ENDSTOPActivated);
+        }
+        #endregion
+
+        #region ConsoleWriter
+        // Console Writer, centralized, so onscreen texts aren't going to get messy.
         public static void WriteOnConsole(string message, PointI location, int cleanLen, bool showCursor = false)
         {
             lock (lockObj)
@@ -40,15 +50,12 @@ namespace FTS.Core
                 if (Console.CursorVisible) Console.CursorVisible = false;
             }
         }
+        #endregion
 
-
-        private static void Serial_EngravingToggle(SerialCallBackEventArgs e)
-        {
-            Memory.Instance.SetEmergency(EmergencyReasons.ENDSTOPActivated);
-        }
-
+        #region Run
         public static void Run(ISerial serial = null)
         {
+            #region Initial Setups
             Serial = serial;
             if (Serial == null) Serial = new SerialComms();
             Serial.TryConnect += Serial_TryConnect;
@@ -60,7 +67,6 @@ namespace FTS.Core
                 $"Serial on {Configuration.Instance.SerialCOMPort} disconnected, cannot proceed.");
 
             Task.Run(() => Serial.ListenAsync());
-            //Task.Run(() => Serial.Move());
 
             Console.CursorVisible = false;
             var tk = CancellationSource.Token;
@@ -73,6 +79,9 @@ namespace FTS.Core
             Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
             MovementManager movement = new(Serial);
 
+            #endregion
+
+            #region Input loop
             while (!tk.IsCancellationRequested)
             {
                 var k = Console.ReadKey(true);
@@ -124,8 +133,11 @@ namespace FTS.Core
                         movement.MoveTo(destination.X, destination.Y);
                         break;
                 }
-            }
 
+            }
+            #endregion
+
+            #region User manual positioning
             static PointI getCustomPointFromInput(out bool valid)
             {
                 SuspendDraw = true;
@@ -158,17 +170,9 @@ namespace FTS.Core
 
                 // melhorar este input
             }
+            #endregion
 
-            async void updateAsync()
-            {
-                while (!tk.IsCancellationRequested)
-                {
-                    await Task.Delay(10);
-                    checkAlarm();
-                    draw();
-                }
-            }
-
+            #region AlarmCheck
             void checkAlarm()
             {
                 if (Memory.Instance.PositionSteps_X > Configuration.Instance.WorkspaceMM.X)
@@ -182,6 +186,18 @@ namespace FTS.Core
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
 
                 Memory.Instance.Idle = !Memory.Instance.Moving;
+            }
+            #endregion
+
+            #region Draw
+            async void updateAsync()
+            {
+                while (!tk.IsCancellationRequested)
+                {
+                    await Task.Delay(10);
+                    checkAlarm();
+                    draw();
+                }
             }
 
             void draw()
@@ -255,6 +271,9 @@ namespace FTS.Core
                 }
                 catch { }
             }
+            #endregion
         }
+
+        #endregion
     }
 }
