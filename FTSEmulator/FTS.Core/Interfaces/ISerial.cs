@@ -44,7 +44,7 @@ namespace FTS.Core
         public bool IsOpen { get; }
 
         public bool Open();
-        public void Move(Step step);
+        public void Move(Step x, Step y, Step z);
         void ListenAsync();
     }
 }

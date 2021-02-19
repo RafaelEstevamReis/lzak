@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace FTS.Core
 {
@@ -6,7 +7,10 @@ namespace FTS.Core
     {
         public static Memory Instance { get; } = new Memory();
 
-        public PointF PositionMM { get; set; }
+        public int PositionSteps_X { get; set; }
+        public int PositionSteps_Y { get; set; }
+        public int PositionSteps_Z { get; set; }
+
         public PointF FeedRateMmPerMinute { get; set; }
 
         // Statuses
@@ -22,7 +26,10 @@ namespace FTS.Core
 
         private Memory()
         {
-            PositionMM = new PointF();
+            PositionSteps_X = 0;
+            PositionSteps_Y = 0;
+            PositionSteps_Z = 0;
+
             FeedRateMmPerMinute = new PointF();
         }
 

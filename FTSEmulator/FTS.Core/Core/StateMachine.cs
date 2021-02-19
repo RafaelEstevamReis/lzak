@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,30 +9,38 @@ namespace FTS.Core
         static bool SuspendDraw = false;
         static CancellationTokenSource CancellationSource = new();
         static ISerial Serial;
+        static object lockObj = new object();
 
         private static void Serial_ConnectSuccessfull(SerialConnectEventArgs e)
         {
-            Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write(new string(' ', 50));
-            Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write($"Connected on {Serial.Serial.PortName}!");
+            WriteOnConsole($"Connected on {Serial.Serial.PortName}!", new PointI(62, 0), 50);
         }
 
         private static void Serial_ConnectFailure(SerialConnectEventArgs e)
         {
-            Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write(new string(' ', 50));
-            Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write($"Failed connecting. Message: {e.Exception.Message}.");
+            WriteOnConsole($"Failed connecting. Message: {e.Exception.Message}.", new PointI(62, 0), 50);
         }
 
         private static void Serial_TryConnect(SerialConnectEventArgs e)
         {
-            Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write(new string(' ', 50));
-            Console.SetCursorPosition(62, Console.CursorTop);
-            Console.Write($"Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...");
+            WriteOnConsole($"Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...", new PointI(62, 0), 50);
         }
+
+        public static void WriteOnConsole(string message, PointI location, int cleanLen, bool showCursor = false)
+        {
+            lock (lockObj)
+            {
+                Console.CursorVisible = showCursor;
+
+                Console.SetCursorPosition(location.X, location.Y);
+                Console.Write(new string(' ', cleanLen));
+                Console.SetCursorPosition(location.X, location.Y);
+                Console.Write(message);
+
+                if (Console.CursorVisible) Console.CursorVisible = false;
+            }
+        }
+
 
         private static void Serial_EngravingToggle(SerialCallBackEventArgs e)
         {
@@ -64,7 +71,7 @@ namespace FTS.Core
 
             // Início: não sei onde estão os motores.
             Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
-            Movement movement = new(Serial);
+            MovementManager movement = new(Serial);
 
             while (!tk.IsCancellationRequested)
             {
@@ -83,7 +90,10 @@ namespace FTS.Core
                         Memory.Instance.ClearEmergency();
                         break;
                     case ConsoleKey.H:
-                        Memory.Instance.PositionMM = new PointF(); // 0,0
+                        Memory.Instance.PositionSteps_X = 0; // 0,0
+                        Memory.Instance.PositionSteps_Y = 0; // 0,0
+                        Memory.Instance.PositionSteps_Z = 0; // 0,0
+
                         if (Memory.Instance.Alarm)
                         {
                             if ((int)Memory.Instance.AlarmReason / 100 == 1)
@@ -94,37 +104,38 @@ namespace FTS.Core
                         break;
 
                     case ConsoleKey.UpArrow:
-                        movement.Move(0, +Configuration.Instance.StepSizeMM);
+                        movement.Move(0, +Configuration.Instance.StepsPerMilimiter_Y);
                         break;
                     case ConsoleKey.DownArrow:
-                        movement.Move(0, -Configuration.Instance.StepSizeMM);
+                        movement.Move(0, -Configuration.Instance.StepsPerMilimiter_Y);
                         break;
                     case ConsoleKey.LeftArrow:
-                        movement.Move(-Configuration.Instance.StepSizeMM, 0);
+                        movement.Move(-Configuration.Instance.StepsPerMilimiter_X, 0);
                         break;
                     case ConsoleKey.RightArrow:
-                        movement.Move(+Configuration.Instance.StepSizeMM, 0);
+                        movement.Move(+Configuration.Instance.StepsPerMilimiter_X, 0);
                         break;
 
                     case ConsoleKey.Enter:
-                        Point destination = getCustomPointFromInput(out bool valid);
+                        if (Memory.Instance.Alarm) System.Diagnostics.Debugger.Break();
+
+                        PointI destination = getCustomPointFromInput(out bool valid);
                         if (!valid) continue;
                         movement.MoveTo(destination.X, destination.Y);
                         break;
                 }
             }
 
-            static Point getCustomPointFromInput(out bool valid)
+            static PointI getCustomPointFromInput(out bool valid)
             {
                 SuspendDraw = true;
                 Thread.Sleep(100);
 
-                Console.CursorVisible = true;
                 Console.SetCursorPosition(0, 0);
                 Console.Write(new string(' ', 20));
                 Console.SetCursorPosition(0, 0);
 
-                Console.Write("Go to (x:y): ");
+                WriteOnConsole("Go to (x:y): ", new PointI(0, 0), 20, true);
                 var line = Console.ReadLine();
                 var parts = line.Split(':');
                 Console.CursorVisible = false;
@@ -135,7 +146,7 @@ namespace FTS.Core
                 Console.SetCursorPosition(0, 0);
                 try
                 {
-                    var p = new Point(Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1]));
+                    var p = new PointI(Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1]));
                     valid = true;
 
                     return p;
@@ -143,7 +154,7 @@ namespace FTS.Core
                 }
                 catch { valid = false; }
 
-                return new Point(0,0);
+                return new PointI(0, 0);
 
                 // melhorar este input
             }
@@ -160,14 +171,14 @@ namespace FTS.Core
 
             void checkAlarm()
             {
-                if (Memory.Instance.PositionMM.X > Configuration.Instance.WorkspaceMM.X)
+                if (Memory.Instance.PositionSteps_X > Configuration.Instance.WorkspaceMM.X)
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
-                if (Memory.Instance.PositionMM.X < 0)
+                if (Memory.Instance.PositionSteps_X < 0)
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
 
-                if (Memory.Instance.PositionMM.Y > Configuration.Instance.WorkspaceMM.Y)
+                if (Memory.Instance.PositionSteps_Y > Configuration.Instance.WorkspaceMM.Y)
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
-                if (Memory.Instance.PositionMM.Y < 0)
+                if (Memory.Instance.PositionSteps_Y < 0)
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
 
                 Memory.Instance.Idle = !Memory.Instance.Moving;
@@ -184,15 +195,19 @@ namespace FTS.Core
                 left += 62;
                 top += 2;
 
-                PointF pos = mem.PositionMM;
+                PointF pos = new PointF()
+                {
+                    X = MathHelper.StepsToMillimiters(mem.PositionSteps_X, Configuration.Instance.StepsPerMilimiter_X),
+                    Y = MathHelper.StepsToMillimiters(mem.PositionSteps_Y, Configuration.Instance.StepsPerMilimiter_Y),
+                };
 
                 SetCursorPosition(myLastDrawX);
                 Console.Write(" ");
 
                 Console.SetCursorPosition(left, top++);
-                Console.Write($"X: {pos.X}   ");
+                Console.Write($"X: {pos.X:N1}   ");
                 Console.SetCursorPosition(left, top++);
-                Console.Write($"Y: {pos.Y}   ");
+                Console.Write($"Y: {pos.Y:N1}   ");
 
                 Console.SetCursorPosition(left, top++);
 

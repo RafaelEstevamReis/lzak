@@ -1,0 +1,23 @@
+25/02
+
+CORRIGIR:
+{
+	- corrigir piscadelas: deixar no padrão abaixo.
+	xx yy zz
+	00 00 00
+	DS DS DS
+
+	- UnitTests Math
+}
+
+IMPLEMENTAR:
+{
+	- Adicionar compatibilidade com Driver (A4988)
+
+	Lista de compras:
+	- Driver
+	- Stepper motor
+	- Capacitor 50V 100mF (uns 5)
+	- pin headers (macho e fêmea)
+	- conectores modu (alojamento e barra) e KK (alojamento e barra)
+}

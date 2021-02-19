@@ -17,7 +17,10 @@ namespace FTS.Core
         public PointF WorkspaceMM { get; }
         // [0,0] is at Lower Left Corner!
 
-        public float StepSizeMM { get; set; }
+        public int StepsPerMilimiter_X { get; set; }
+        public int StepsPerMilimiter_Y { get; set; }
+        public int StepsPerMilimiter_Z { get; set; }
+
 
         private Configuration()
         {
@@ -28,7 +31,12 @@ namespace FTS.Core
             SerialDataBits = 8;
             SerialStopBits = StopBits.One;
 
-            StepSizeMM = 2;
+            // dunno!
+            
+            StepsPerMilimiter_X = 20;
+            StepsPerMilimiter_Y = 20;
+            StepsPerMilimiter_Z = 20;
+
             WorkspaceMM = new PointF()
             {
                 X = 100,

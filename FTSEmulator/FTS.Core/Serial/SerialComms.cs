@@ -69,41 +69,36 @@ namespace FTS.Core
             else return false;
         }
         // Blink por enquanto
-        public void Move(Step step)
+        public void Move(Step x, Step y, Step z)
         {
-            using var bw = new BinaryWriter(Serial.BaseStream);
+            // this stream shouldn't be disposed!
+            var bw = new BinaryWriter(Serial.BaseStream);
 
-            // if(step == Step.StepLeft) moveStepperMotor(bw, 
-
-            // concept blinking art
-            //while (true)
-            //{
-            //    for (int i = 0; ; i++)
-            //    {
-            //        sw.Write((byte)(1 << (i % 6)));
-            //        Thread.Sleep(50);
-            //    }
-            //}
-        }
-
-        private static void moveStepperMotor(BinaryWriter bw, params Step[] Steps)
-        {
-            if (Steps.Length != 3) throw new ArgumentException("Not enough steps provided.");
-
-            byte bX = (byte)Steps[0];
-            byte bY = (byte)Steps[1];
-            byte bZ = (byte)Steps[2];
+            byte bX = (byte)x;
+            byte bY = (byte)y;
+            byte bZ = (byte)z;
 
             var b = (bX << 4) +
                     (bY << 2) +
                      bZ;
 
+
+            // first, the sw has to turn the pins on with current instruction
             bw.Write((byte)b);
+            bw.Flush();
+
+            // then wait a tad (sorry)
+            Thread.Sleep(1);
+
+            //... followed by powering down the pins
+            bw.Write((byte)0x00);
+            bw.Flush();
         }
 
         public async void ListenAsync()
         {
-            using var sr = new BinaryReader(Serial.BaseStream, encoding: Encoding.ASCII);
+            // this stream shouldn't be disposed!
+            var sr = new BinaryReader(Serial.BaseStream, encoding: Encoding.ASCII);
 
             int len;
             var buffer = new byte[512];
@@ -124,11 +119,6 @@ namespace FTS.Core
                     EngravingToggle?.Invoke(new SerialCallBackEventArgs(false));
                 }
             }
-        }
-
-        public void Move()
-        {
-            throw new NotImplementedException();
         }
     }
 }
