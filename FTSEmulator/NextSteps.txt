@@ -8,6 +8,8 @@ CORRIGIR:
 	DS DS DS
 
 	- UnitTests Math
+
+	- colocar os desenhos em tela em uma função só
 }
 
 IMPLEMENTAR:
