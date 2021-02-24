@@ -10,7 +10,7 @@ namespace FTS.Core
         static CancellationTokenSource CancellationSource = new();
         static ISerial Serial;
         static object lockObj = new object();
-        static ConsoleWriter cWriter;
+        static ConsoleWriterHelper cWriter;
 
         #region Events
         // Events!
@@ -39,7 +39,7 @@ namespace FTS.Core
         public static void Run(ISerial serial = null)
         {
             #region Initial Setups
-            cWriter = new ConsoleWriter(lockObj);
+            cWriter = new ConsoleWriterHelper(lockObj);
             Serial = serial;
             if (Serial == null) Serial = new SerialComms();
             Serial.TryConnect += Serial_TryConnect;
@@ -99,21 +99,21 @@ namespace FTS.Core
                         break;
 
                     case ConsoleKey.UpArrow:
-                        movement.Move(0, +Configuration.Instance.StepsPerMilimiter_Y);
+                        movement.Move(0, +Configuration.Instance.StepsPerMillimiter_Y);
                         break;
                     case ConsoleKey.DownArrow:
-                        movement.Move(0, -Configuration.Instance.StepsPerMilimiter_Y);
+                        movement.Move(0, -Configuration.Instance.StepsPerMillimiter_Y);
                         break;
                     case ConsoleKey.LeftArrow:
-                        movement.Move(-Configuration.Instance.StepsPerMilimiter_X, 0);
+                        movement.Move(-Configuration.Instance.StepsPerMillimiter_X, 0);
                         break;
                     case ConsoleKey.RightArrow:
-                        movement.Move(+Configuration.Instance.StepsPerMilimiter_X, 0);
+                        movement.Move(+Configuration.Instance.StepsPerMillimiter_X, 0);
                         break;
 
                     case ConsoleKey.Enter:
-                        if (Memory.Instance.Alarm) 
-                            System.Diagnostics.Debugger.Break();
+                        //if (Memory.Instance.Alarm) System.Diagnostics.Debugger.Break();
+
                         PointF destination = getCustomPointFromInput(out bool valid);
                         if (!valid) continue;
                         Memory.Instance.DestinationPosition = destination;
@@ -131,7 +131,7 @@ namespace FTS.Core
                 SuspendDraw = true;
                 Thread.Sleep(100);
 
-                cWriter.WriteOnConsole("Move to position (x:y): ", inputPos, 20, true);
+                cWriter.WriteOnConsole("Move to position (x:y): ", inputPos, 30, true);
                 var line = Console.ReadLine();
                 var parts = line.Split(':');
                 Console.CursorVisible = false;
@@ -142,6 +142,10 @@ namespace FTS.Core
                 try
                 {
                     var p = new PointF(Convert.ToSingle(parts[0]), Convert.ToSingle(parts[1]));
+
+                    if (p.X > Configuration.Instance.WorkspaceMM.X) p.X = Configuration.Instance.WorkspaceMM.X;
+                    if (p.Y > Configuration.Instance.WorkspaceMM.Y) p.Y = Configuration.Instance.WorkspaceMM.Y;
+
                     valid = true;
 
                     return p;
@@ -204,8 +208,8 @@ namespace FTS.Core
 
                 PointF pos = new PointF()
                 {
-                    X = MathHelper.StepsToMillimiters(mem.PositionSteps_X, Configuration.Instance.StepsPerMilimiter_X),
-                    Y = MathHelper.StepsToMillimiters(mem.PositionSteps_Y, Configuration.Instance.StepsPerMilimiter_Y)
+                    X = MathHelper.StepsToMillimiters(mem.PositionSteps_X, Configuration.Instance.StepsPerMillimiter_X),
+                    Y = MathHelper.StepsToMillimiters(mem.PositionSteps_Y, Configuration.Instance.StepsPerMillimiter_Y)
                 };
 
                 cWriter.WriteOnConsole(" ", myLastDrawX, 10);
@@ -243,15 +247,10 @@ namespace FTS.Core
         static void drawHudElements(Memory mem, Configuration cfg)
         {
             var uInput = new PointI(cfg.UserInputArea.X - 1, cfg.UserInputArea.Y - 1);
-
             cWriter.HorizontalLine(new PointI(0, 25), 62);
-
             cWriter.HorizontalLine(uInput, Console.WindowWidth - uInput.X);
-
             uInput.Y += 2;
-
             cWriter.HorizontalLine(new PointI(63, 11), Console.WindowWidth - uInput.X);
-
             cWriter.VerticalLine(new PointI(cfg.ConsoleTableDimensions.X, 0), Console.WindowHeight);
 
             if (mem.Moving)
@@ -264,20 +263,15 @@ namespace FTS.Core
             }
 
             // the statues on the bottom of the screen
-            PointI position = new PointI(8, 26);
+            var bottom = new PointI(cfg.BottomStatuses.X, cfg.BottomStatuses.Y);
 
-            cWriter.WriteOnConsole(mem.Idle ? "[IDLE]" : "[----]", position, 0);
-            position.X += 10;
-            cWriter.WriteOnConsole(mem.Moving ? "[MOVE]" : "[----]", position, 0);
-            position.X += 10;
-            cWriter.WriteOnConsole(mem.Engraving ? "[ENGR]" : "[----]", position, 0);
-            position.X += 10;
-            cWriter.WriteOnConsole(mem.Alarm ? $"[ALRM:{(int)mem.AlarmReason}]" : "[--------]", position, 0);
-        }
-
-        static void drawDecoratorLines(PointI ConsoleTableDimensions)
-        {
-            
+            cWriter.WriteOnConsole(mem.Idle ? "[IDLE]" : "[----]", bottom, 0);
+            bottom.X += 10;
+            cWriter.WriteOnConsole(mem.Moving ? "[MOVE]" : "[----]", bottom, 0);
+            bottom.X += 10;
+            cWriter.WriteOnConsole(mem.Engraving ? "[ENGR]" : "[----]", bottom, 0);
+            bottom.X += 10;
+            cWriter.WriteOnConsole(mem.Alarm ? $"[ALRM:{(int)mem.AlarmReason}]" : "[--------]", bottom, 0);
         }
         #endregion
     }
