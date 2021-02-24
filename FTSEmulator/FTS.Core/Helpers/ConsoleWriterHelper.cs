@@ -2,10 +2,10 @@
 
 namespace FTS.Core
 {
-    public class ConsoleWriter
+    public class ConsoleWriterHelper
     {
         object lockObj;
-        public ConsoleWriter(object lockObj)
+        public ConsoleWriterHelper(object lockObj)
         {
             if (lockObj is null) throw new Exception("Invalid lock object");
             this.lockObj = lockObj;
