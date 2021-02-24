@@ -21,9 +21,18 @@ namespace FTS.Core
         public int StepsPerMilimiter_Y { get; set; }
         public int StepsPerMilimiter_Z { get; set; }
 
+        // DrawConfig
+        public PointI UserInputArea { get; set; }
+        public PointI ConsoleTableDimensions{ get; set; }
+
 
         private Configuration()
         {
+            // draw
+            UserInputArea = new PointI(64, 10);
+            ConsoleTableDimensions = new PointI(62, 25);
+
+            // serial
             SerialBaudRate = 9600;
             SerialCOMPort = "COM4";
             SerialMaxCnnTries = 10;
