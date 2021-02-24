@@ -13,6 +13,8 @@ namespace FTS.Core
 
         public PointF FeedRateMmPerMinute { get; set; }
 
+        public PointF DestinationPosition { get; set; }
+
         // Statuses
         public bool Idle { get; set; }
         public bool Moving { get; set; }
