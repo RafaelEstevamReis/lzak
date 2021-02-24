@@ -16,8 +16,8 @@ namespace FTS.Core
         // in mm
         public void MoveTo(float X, float Y)
         {
-            int x_step = MathHelper.MillimitersToSteps(X, config.StepsPerMilimiter_X);
-            int y_step = MathHelper.MillimitersToSteps(Y, config.StepsPerMilimiter_Y);
+            int x_step = MathHelper.MillimitersToSteps(X, config.StepsPerMillimiter_X);
+            int y_step = MathHelper.MillimitersToSteps(Y, config.StepsPerMillimiter_Y);
 
             MoveTo_Steps(x_step, y_step);
         }
@@ -30,8 +30,8 @@ namespace FTS.Core
         }
         public void Move(float X, float Y)
         {
-            int x_step = MathHelper.MillimitersToSteps(X, config.StepsPerMilimiter_X);
-            int y_step = MathHelper.MillimitersToSteps(Y, config.StepsPerMilimiter_Y);
+            int x_step = MathHelper.MillimitersToSteps(X, config.StepsPerMillimiter_X);
+            int y_step = MathHelper.MillimitersToSteps(Y, config.StepsPerMillimiter_Y);
 
             Move_Steps(x_step, y_step);
         }
