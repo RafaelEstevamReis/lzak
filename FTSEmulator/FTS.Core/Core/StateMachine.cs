@@ -146,6 +146,9 @@ namespace FTS.Core
                     if (p.X > Configuration.Instance.WorkspaceMM.X) p.X = Configuration.Instance.WorkspaceMM.X;
                     if (p.Y > Configuration.Instance.WorkspaceMM.Y) p.Y = Configuration.Instance.WorkspaceMM.Y;
 
+                    if (p.X < 0) p.X = 0;
+                    if (p.Y < 0) p.Y = 0;
+
                     valid = true;
 
                     return p;
@@ -215,8 +218,8 @@ namespace FTS.Core
                 cWriter.WriteOnConsole(" ", myLastDrawX, 10);
 
                 // the real position values
-                cWriter.WriteOnConsole($"X (value): {pos.X:N1}", new PointI(left, top++), 10);
-                cWriter.WriteOnConsole($"Y (value): {pos.Y:N1}", new PointI(left, top++), 10);
+                cWriter.WriteOnConsole($"X (value): {pos.X:N1}", new PointI(left, top++), 20);
+                cWriter.WriteOnConsole($"Y (value): {pos.Y:N1}", new PointI(left, top++), 20);
 
                 PointF posTela = new PointF()
                 {
