@@ -11,7 +11,9 @@ namespace FTS.Core
         public event OnEngravingToggle EngravingToggle;
 
         public bool IsOpen { get; set; }
-        bool SimulateSerialError = true;
+
+        // set this flag to throw a connection error for testing.
+        bool SimulateSerialError = false;
 
         public SerialPort Serial { get; } = new SerialPort("MOCK_COM", 9600, Parity.None, 8, StopBits.One);
 
