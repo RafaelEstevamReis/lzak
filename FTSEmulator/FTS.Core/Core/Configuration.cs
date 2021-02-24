@@ -17,20 +17,21 @@ namespace FTS.Core
         public PointF WorkspaceMM { get; }
         // [0,0] is at Lower Left Corner!
 
-        public int StepsPerMilimiter_X { get; set; }
-        public int StepsPerMilimiter_Y { get; set; }
-        public int StepsPerMilimiter_Z { get; set; }
+        public int StepsPerMillimiter_X { get; set; }
+        public int StepsPerMillimiter_Y { get; set; }
+        public int StepsPerMillimiter_Z { get; set; }
 
         // DrawConfig
         public PointI UserInputArea { get; set; }
         public PointI ConsoleTableDimensions{ get; set; }
-
+        public PointI BottomStatuses { get; set; }
 
         private Configuration()
         {
             // draw
             UserInputArea = new PointI(64, 10);
             ConsoleTableDimensions = new PointI(62, 25);
+            BottomStatuses = new PointI(8, 26);
 
             // serial
             SerialBaudRate = 9600;
@@ -40,11 +41,9 @@ namespace FTS.Core
             SerialDataBits = 8;
             SerialStopBits = StopBits.One;
 
-            // dunno!
-            
-            StepsPerMilimiter_X = 20;
-            StepsPerMilimiter_Y = 20;
-            StepsPerMilimiter_Z = 20;
+            StepsPerMillimiter_X = 1;
+            StepsPerMillimiter_Y = 1;
+            StepsPerMillimiter_Z = 1;
 
             WorkspaceMM = new PointF()
             {
