@@ -33,8 +33,8 @@ namespace FTS.Core
         }
         public bool Open()
         {
-            // Conectar ao arduino.
-            // tem um retorno em bool e um eventos dizendo o status.
+            // This connects table microcontroller
+            // it works by status events OR bool return to say it's all right or not.
             return IsOpen = connect();
         }
         private bool connect()
@@ -83,11 +83,12 @@ namespace FTS.Core
                      bZ;
 
 
-            // first, the sw has to turn the pins on with current instruction
+            // first, the binaryWriter has to write current instruction
+            // That means turning given pins on.
             bw.Write((byte)b);
             bw.Flush();
 
-            // then wait a tad (sorry)
+            // then wait a tad... 
             Thread.Sleep(1);
 
             //... followed by powering down the pins
@@ -97,7 +98,7 @@ namespace FTS.Core
 
         public async void ListenAsync()
         {
-            // this stream shouldn't be disposed!
+            // this stream mustn't be disposed!
             var sr = new BinaryReader(Serial.BaseStream, encoding: Encoding.ASCII);
 
             int len;
