@@ -15,17 +15,17 @@ namespace FTS.Core
         // Events!
         private static void Serial_ConnectSuccessfull(SerialConnectEventArgs e)
         {
-            WriteOnConsole($"Connected on {Serial.Serial.PortName}!", new PointI(62, 0), 50);
+            WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(62, 0), 50);
         }
 
         private static void Serial_ConnectFailure(SerialConnectEventArgs e)
         {
-            WriteOnConsole($"Failed connecting. Message: {e.Exception.Message}.", new PointI(62, 0), 50);
+            WriteOnConsole($"SERIAL: Failed connecting. Message: {e.Exception.Message}.", new PointI(62, 0), 50);
         }
 
         private static void Serial_TryConnect(SerialConnectEventArgs e)
         {
-            WriteOnConsole($"Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...", new PointI(62, 0), 50);
+            WriteOnConsole($"SERIAL: Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...", new PointI(62, 0), 50);
         }
 
         private static void Serial_EngravingToggle(SerialCallBackEventArgs e)
@@ -50,6 +50,13 @@ namespace FTS.Core
                 if (Console.CursorVisible) Console.CursorVisible = false;
             }
         }
+
+        public static void CleanLine(PointI pos, int cleanLen)
+        {
+            WriteOnConsole(string.Empty, pos, cleanLen);
+            Console.SetCursorPosition(pos.X, pos.Y);
+        }
+
         #endregion
 
         #region Run
@@ -63,8 +70,10 @@ namespace FTS.Core
             Serial.ConnectSuccessful += Serial_ConnectSuccessfull;
             Serial.EngravingToggle += Serial_EngravingToggle;
 
-            if (!Serial.Open()) throw new Exception(
-                $"Serial on {Configuration.Instance.SerialCOMPort} disconnected, cannot proceed.");
+            if (!Serial.Open())
+            {
+                throw new Exception($"Serial on {Configuration.Instance.SerialCOMPort} disconnected, cannot proceed.");
+            }
 
             Task.Run(() => Serial.ListenAsync());
 
@@ -143,19 +152,13 @@ namespace FTS.Core
                 SuspendDraw = true;
                 Thread.Sleep(100);
 
-                Console.SetCursorPosition(0, 0);
-                Console.Write(new string(' ', 20));
-                Console.SetCursorPosition(0, 0);
-
                 WriteOnConsole("Go to (x:y): ", new PointI(0, 0), 20, true);
                 var line = Console.ReadLine();
                 var parts = line.Split(':');
                 Console.CursorVisible = false;
                 SuspendDraw = false;
 
-                Console.SetCursorPosition(0, 0);
-                Console.Write(new string(' ', 20));
-                Console.SetCursorPosition(0, 0);
+                CleanLine(new PointI(0, 0), 20);
                 try
                 {
                     var p = new PointI(Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1]));
@@ -176,14 +179,24 @@ namespace FTS.Core
             void checkAlarm()
             {
                 if (Memory.Instance.PositionSteps_X > Configuration.Instance.WorkspaceMM.X)
+                {
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
+                }
+
                 if (Memory.Instance.PositionSteps_X < 0)
+                {
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
+                }
 
                 if (Memory.Instance.PositionSteps_Y > Configuration.Instance.WorkspaceMM.Y)
+                {
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
+                }
+
                 if (Memory.Instance.PositionSteps_Y < 0)
+                {
                     Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
+                }
 
                 Memory.Instance.Idle = !Memory.Instance.Moving;
             }
@@ -213,19 +226,18 @@ namespace FTS.Core
 
                 PointF pos = new PointF()
                 {
-                    X = MathHelper.StepsToMillimiters(mem.PositionSteps_X, Configuration.Instance.StepsPerMilimiter_X),
-                    Y = MathHelper.StepsToMillimiters(mem.PositionSteps_Y, Configuration.Instance.StepsPerMilimiter_Y),
+                    X = MathHelper.StepsToMillimiters(mem.PositionSteps_X, 
+                                                      Configuration.Instance.StepsPerMilimiter_X),
+
+                    Y = MathHelper.StepsToMillimiters(mem.PositionSteps_Y, 
+                                                      Configuration.Instance.StepsPerMilimiter_Y)
                 };
 
-                SetCursorPosition(myLastDrawX);
-                Console.Write(" ");
+                WriteOnConsole(" ", myLastDrawX, 10);
 
-                Console.SetCursorPosition(left, top++);
-                Console.Write($"X: {pos.X:N1}   ");
-                Console.SetCursorPosition(left, top++);
-                Console.Write($"Y: {pos.Y:N1}   ");
-
-                Console.SetCursorPosition(left, top++);
+                // the real position values
+                WriteOnConsole($"X (value): {pos.X:N1}", new PointI(left, top++), 10);
+                WriteOnConsole($"Y (value): {pos.Y:N1}", new PointI(left, top++), 10);
 
                 PointF posTela = new PointF()
                 {
@@ -237,43 +249,35 @@ namespace FTS.Core
                     X = (int)Math.Round(posTela.X),
                     Y = (int)Math.Round(posTela.Y)
                 };
-                Console.SetCursorPosition(left, top++);
-                Console.Write($"XC: {posTelaReal.X}   ");
-                Console.SetCursorPosition(left, top++);
-                Console.Write($"YC: {posTelaReal.Y}   ");
 
+                // the console screen position values
+                top++;
+                WriteOnConsole($"X (console): {posTelaReal.X:N1}", new PointI(left, top++), 20);
+                WriteOnConsole($"X (console): {posTelaReal.Y:N1}", new PointI(left, top++), 20);
 
-                SetCursorPosition(posTelaReal);
-                myLastDrawX = posTelaReal;
-                Console.Write("X");
+                // the pen
+                WriteOnConsole($"o", myLastDrawX = posTelaReal, 0);
 
-                Console.SetCursorPosition(0, 25);
-                if (mem.Idle) Console.Write("[IDLE]");
-                else Console.Write("[----]");
-
-                Console.SetCursorPosition(10, 25);
-                if (mem.Moving) Console.Write("[MOVE]");
-                else Console.Write("[----]");
-
-                Console.SetCursorPosition(20, 25);
-                if (mem.Engraving) Console.Write("[ENGR]");
-                else Console.Write("[----]");
-
-                Console.SetCursorPosition(30, 25);
-                if (mem.Alarm) Console.Write($"[ALRM:{(int)mem.AlarmReason}]");
-                else Console.Write("[--------]");
+                // the bottom statuses
+                setBottomStatuses(mem);
             }
-            void SetCursorPosition(PointI pos)
-            {
-                try
-                {
-                    Console.SetCursorPosition(pos.X, pos.Y);
-                }
-                catch { }
-            }
+
             #endregion
         }
 
+        static void setBottomStatuses(Memory mem)
+        {
+            // the statues on the bottom of the screen
+            PointI position = new PointI(0, 25);
+
+            WriteOnConsole(mem.Idle ? "[IDLE]" : "[----]", position, 0);
+            position.X += 10;
+            WriteOnConsole(mem.Moving ? "[MOVE]" : "[----]", position, 0);
+            position.X += 10;
+            WriteOnConsole(mem.Engraving ? "[ENGR]" : "[----]", position, 0);
+            position.X += 10;
+            WriteOnConsole(mem.Alarm ? $"[ALRM:{(int)mem.AlarmReason}]" : "[--------]", position, 0);
+        }
         #endregion
     }
 }
