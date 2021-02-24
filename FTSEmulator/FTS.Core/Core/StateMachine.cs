@@ -10,22 +10,23 @@ namespace FTS.Core
         static CancellationTokenSource CancellationSource = new();
         static ISerial Serial;
         static object lockObj = new object();
+        static ConsoleWriter cWriter;
 
         #region Events
         // Events!
         private static void Serial_ConnectSuccessfull(SerialConnectEventArgs e)
         {
-            WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(62, 0), 50);
+            cWriter.WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(64, 0), 50);
         }
 
         private static void Serial_ConnectFailure(SerialConnectEventArgs e)
         {
-            WriteOnConsole($"SERIAL: Failed connecting. Message: {e.Exception.Message}.", new PointI(62, 0), 50);
+            cWriter.WriteOnConsole($"SERIAL: Failed connecting. Message: {e.Exception.Message}.", new PointI(64, 0), 50);
         }
 
         private static void Serial_TryConnect(SerialConnectEventArgs e)
         {
-            WriteOnConsole($"SERIAL: Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...", new PointI(62, 0), 50);
+            cWriter.WriteOnConsole($"SERIAL: Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...", new PointI(64, 0), 50);
         }
 
         private static void Serial_EngravingToggle(SerialCallBackEventArgs e)
@@ -34,35 +35,11 @@ namespace FTS.Core
         }
         #endregion
 
-        #region ConsoleWriter
-        // Console Writer, centralized, so onscreen texts aren't going to get messy.
-        public static void WriteOnConsole(string message, PointI location, int cleanLen, bool showCursor = false)
-        {
-            lock (lockObj)
-            {
-                Console.CursorVisible = showCursor;
-
-                Console.SetCursorPosition(location.X, location.Y);
-                Console.Write(new string(' ', cleanLen));
-                Console.SetCursorPosition(location.X, location.Y);
-                Console.Write(message);
-
-                if (Console.CursorVisible) Console.CursorVisible = false;
-            }
-        }
-
-        public static void CleanLine(PointI pos, int cleanLen)
-        {
-            WriteOnConsole(string.Empty, pos, cleanLen);
-            Console.SetCursorPosition(pos.X, pos.Y);
-        }
-
-        #endregion
-
         #region Run
         public static void Run(ISerial serial = null)
         {
             #region Initial Setups
+            cWriter = new ConsoleWriter(lockObj);
             Serial = serial;
             if (Serial == null) Serial = new SerialComms();
             Serial.TryConnect += Serial_TryConnect;
@@ -135,33 +112,36 @@ namespace FTS.Core
                         break;
 
                     case ConsoleKey.Enter:
-                        if (Memory.Instance.Alarm) System.Diagnostics.Debugger.Break();
-
-                        PointI destination = getCustomPointFromInput(out bool valid);
+                        if (Memory.Instance.Alarm) 
+                            System.Diagnostics.Debugger.Break();
+                        PointF destination = getCustomPointFromInput(out bool valid);
                         if (!valid) continue;
+                        Memory.Instance.DestinationPosition = destination;
                         movement.MoveTo(destination.X, destination.Y);
                         break;
                 }
-
             }
             #endregion
 
             #region User manual positioning
-            static PointI getCustomPointFromInput(out bool valid)
+            static PointF getCustomPointFromInput(out bool valid)
             {
+                PointI inputPos = Configuration.Instance.UserInputArea;
+
                 SuspendDraw = true;
                 Thread.Sleep(100);
 
-                WriteOnConsole("Go to (x:y): ", new PointI(0, 0), 20, true);
+                cWriter.WriteOnConsole("Move to position (x:y): ", inputPos, 20, true);
                 var line = Console.ReadLine();
                 var parts = line.Split(':');
                 Console.CursorVisible = false;
                 SuspendDraw = false;
 
-                CleanLine(new PointI(0, 0), 20);
+                cWriter.CleanLine(inputPos, Console.WindowWidth - 64);
+
                 try
                 {
-                    var p = new PointI(Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1]));
+                    var p = new PointF(Convert.ToSingle(parts[0]), Convert.ToSingle(parts[1]));
                     valid = true;
 
                     return p;
@@ -169,9 +149,7 @@ namespace FTS.Core
                 }
                 catch { valid = false; }
 
-                return new PointI(0, 0);
-
-                // melhorar este input
+                return new PointF(0, 0);
             }
             #endregion
 
@@ -221,23 +199,20 @@ namespace FTS.Core
                 var cfg = Configuration.Instance;
                 int left = 0;
                 int top = 0;
-                left += 62;
-                top += 2;
+                left += 64;
+                top += 3;
 
                 PointF pos = new PointF()
                 {
-                    X = MathHelper.StepsToMillimiters(mem.PositionSteps_X, 
-                                                      Configuration.Instance.StepsPerMilimiter_X),
-
-                    Y = MathHelper.StepsToMillimiters(mem.PositionSteps_Y, 
-                                                      Configuration.Instance.StepsPerMilimiter_Y)
+                    X = MathHelper.StepsToMillimiters(mem.PositionSteps_X, Configuration.Instance.StepsPerMilimiter_X),
+                    Y = MathHelper.StepsToMillimiters(mem.PositionSteps_Y, Configuration.Instance.StepsPerMilimiter_Y)
                 };
 
-                WriteOnConsole(" ", myLastDrawX, 10);
+                cWriter.WriteOnConsole(" ", myLastDrawX, 10);
 
                 // the real position values
-                WriteOnConsole($"X (value): {pos.X:N1}", new PointI(left, top++), 10);
-                WriteOnConsole($"Y (value): {pos.Y:N1}", new PointI(left, top++), 10);
+                cWriter.WriteOnConsole($"X (value): {pos.X:N1}", new PointI(left, top++), 10);
+                cWriter.WriteOnConsole($"Y (value): {pos.Y:N1}", new PointI(left, top++), 10);
 
                 PointF posTela = new PointF()
                 {
@@ -252,31 +227,57 @@ namespace FTS.Core
 
                 // the console screen position values
                 top++;
-                WriteOnConsole($"X (console): {posTelaReal.X:N1}", new PointI(left, top++), 20);
-                WriteOnConsole($"X (console): {posTelaReal.Y:N1}", new PointI(left, top++), 20);
+                cWriter.WriteOnConsole($"X (console): {posTelaReal.X:N1}", new PointI(left, top++), 20);
+                cWriter.WriteOnConsole($"Y (console): {posTelaReal.Y:N1}", new PointI(left, top++), 20);
 
                 // the pen
-                WriteOnConsole($"o", myLastDrawX = posTelaReal, 0);
+                cWriter.WriteOnConsole($"o", myLastDrawX = posTelaReal, 0);
 
-                // the bottom statuses
-                setBottomStatuses(mem);
+                // the hud elements
+                drawHudElements(mem, cfg);
             }
 
             #endregion
         }
 
-        static void setBottomStatuses(Memory mem)
+        static void drawHudElements(Memory mem, Configuration cfg)
         {
-            // the statues on the bottom of the screen
-            PointI position = new PointI(0, 25);
+            var uInput = new PointI(cfg.UserInputArea.X - 1, cfg.UserInputArea.Y - 1);
 
-            WriteOnConsole(mem.Idle ? "[IDLE]" : "[----]", position, 0);
+            cWriter.HorizontalLine(new PointI(0, 25), 62);
+
+            cWriter.HorizontalLine(uInput, Console.WindowWidth - uInput.X);
+
+            uInput.Y += 2;
+
+            cWriter.HorizontalLine(new PointI(63, 11), Console.WindowWidth - uInput.X);
+
+            cWriter.VerticalLine(new PointI(cfg.ConsoleTableDimensions.X, 0), Console.WindowHeight);
+
+            if (mem.Moving)
+            {
+                cWriter.WriteOnConsole($"Moving to ({mem.DestinationPosition.X:N1}, {mem.DestinationPosition.Y:N1})...", cfg.UserInputArea, Console.WindowWidth - 64);
+            }
+            else
+            {
+                cWriter.WriteOnConsole("Press Enter for custom move...", cfg.UserInputArea, Console.WindowWidth - 64);
+            }
+
+            // the statues on the bottom of the screen
+            PointI position = new PointI(8, 26);
+
+            cWriter.WriteOnConsole(mem.Idle ? "[IDLE]" : "[----]", position, 0);
             position.X += 10;
-            WriteOnConsole(mem.Moving ? "[MOVE]" : "[----]", position, 0);
+            cWriter.WriteOnConsole(mem.Moving ? "[MOVE]" : "[----]", position, 0);
             position.X += 10;
-            WriteOnConsole(mem.Engraving ? "[ENGR]" : "[----]", position, 0);
+            cWriter.WriteOnConsole(mem.Engraving ? "[ENGR]" : "[----]", position, 0);
             position.X += 10;
-            WriteOnConsole(mem.Alarm ? $"[ALRM:{(int)mem.AlarmReason}]" : "[--------]", position, 0);
+            cWriter.WriteOnConsole(mem.Alarm ? $"[ALRM:{(int)mem.AlarmReason}]" : "[--------]", position, 0);
+        }
+
+        static void drawDecoratorLines(PointI ConsoleTableDimensions)
+        {
+            
         }
         #endregion
     }
