@@ -43,6 +43,8 @@ namespace FTS.Core
 
         public bool IsOpen { get; }
 
+        public IDriver Driver { get; }
+
         public bool Open();
         public void Move(Step x, Step y, Step z);
         void ListenAsync();
