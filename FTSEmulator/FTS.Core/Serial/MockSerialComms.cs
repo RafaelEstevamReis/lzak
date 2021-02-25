@@ -17,6 +17,8 @@ namespace FTS.Core
 
         public SerialPort Serial { get; } = new SerialPort("MOCK_COM", 9600, Parity.None, 8, StopBits.One);
 
+        public IDriver Driver { get; }
+
         // mock serial class, for testing
         public void Move(Step x, Step y, Step z) { }
         public bool Open() => !SimulateSerialError;
