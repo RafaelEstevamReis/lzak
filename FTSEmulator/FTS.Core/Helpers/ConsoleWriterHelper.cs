@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace FTS.Core
 {
@@ -45,17 +46,23 @@ namespace FTS.Core
         {
             lock (lockObj)
             {
-                Console.CursorVisible = showCursor;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    Console.CursorVisible = showCursor;
+                }
 
                 Console.SetCursorPosition(location.X, location.Y);
                 Console.Write(new string(' ', cleanLen));
                 Console.SetCursorPosition(location.X, location.Y);
                 Console.Write(message);
 
-                if (Console.CursorVisible) Console.CursorVisible = false;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Console.CursorVisible)
+                {
+                    Console.CursorVisible = false;
+                }
             }
         }
-        public void CleanLine(PointI pos, int cleanLen)
+        public void ClearLine(PointI pos, int cleanLen)
         {
             WriteOnConsole(string.Empty, pos, cleanLen);
             Console.SetCursorPosition(pos.X, pos.Y);
