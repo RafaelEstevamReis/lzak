@@ -18,7 +18,7 @@ namespace FTS.Core
         public event OnConnectFailure ConnectFailure;
 
         public event OnEngravingToggle EngravingToggle;
-        
+
         public SerialComms()
         {
             Config = Configuration.Instance;
@@ -82,7 +82,6 @@ namespace FTS.Core
                     (bY << 2) +
                      bZ;
 
-
             // first, the binaryWriter has to write current instruction
             // That means turning given pins on.
             bw.Write((byte)b);
@@ -106,19 +105,23 @@ namespace FTS.Core
 
             while (true)
             {
-                await Task.Delay(10);
-                if ((len = sr.Read(buffer, 0, buffer.Length)) == 0) continue;
-
-                var dados = Encoding.ASCII.GetString(buffer, 0, len);
-
-                if (dados.Contains("STOP"))
+                try
                 {
-                    EngravingToggle?.Invoke(new SerialCallBackEventArgs(true));
+                    await Task.Delay(10);
+                    if ((len = sr.Read(buffer, 0, buffer.Length)) == 0) continue;
+
+                    var dados = Encoding.ASCII.GetString(buffer, 0, len);
+
+                    if (dados.Contains("STOP"))
+                    {
+                        EngravingToggle?.Invoke(new SerialCallBackEventArgs(true));
+                    }
+                    else
+                    {
+                        EngravingToggle?.Invoke(new SerialCallBackEventArgs(false));
+                    }
                 }
-                else
-                {
-                    EngravingToggle?.Invoke(new SerialCallBackEventArgs(false));
-                }
+                catch { }
             }
         }
     }
