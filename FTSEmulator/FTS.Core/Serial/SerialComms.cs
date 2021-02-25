@@ -33,8 +33,8 @@ namespace FTS.Core
         }
         public bool Open()
         {
-            // This connects table microcontroller
-            // it works by status events OR bool return to say it's all right or not.
+            // This connects the software to the table microcontroller
+            // it works by status events OR bool return to say it's alright or not.
             return IsOpen = connect();
         }
         private bool connect()
@@ -71,28 +71,38 @@ namespace FTS.Core
         // Blink por enquanto
         public void Move(Step x, Step y, Step z)
         {
-            // this stream shouldn't be disposed!
-            var bw = new BinaryWriter(Serial.BaseStream);
+            try
+            {
+                // this stream shouldn't be disposed!
+                var bw = new BinaryWriter(Serial.BaseStream);
 
-            byte bX = (byte)x;
-            byte bY = (byte)y;
-            byte bZ = (byte)z;
+                byte bX = (byte)x;
+                byte bY = (byte)y;
+                byte bZ = (byte)z;
 
-            var b = (bX << 4) +
-                    (bY << 2) +
-                     bZ;
+                var b = (bX << 4) +
+                        (bY << 2) +
+                         bZ;
 
-            // first, the binaryWriter has to write current instruction
-            // That means turning given pins on.
-            bw.Write((byte)b);
-            bw.Flush();
+                // TODO isso ta errado. Eu não entendi direito como devo sempre piscar 
+                // uma porta pra passo e outra pra direção (aceso = direita, apagado = esquerda, por exemplo)
 
-            // then wait a tad... 
-            Thread.Sleep(1);
+                // first, the binaryWriter has to write current instruction
+                // That means turning given pins on.
+                bw.Write((byte)b);
+                bw.Flush();
 
-            //... followed by powering down the pins
-            bw.Write((byte)0x00);
-            bw.Flush();
+                // then wait a tad... 
+                Thread.Sleep(1);
+
+                //... followed by powering down the pins
+                bw.Write((byte)0x00);
+                bw.Flush();
+            }
+            catch 
+            {
+                Memory.Instance.SetEmergency(EmergencyReasons.ConnectionLost);
+            }
         }
 
         public async void ListenAsync()
