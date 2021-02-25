@@ -14,19 +14,14 @@ namespace FTS.Core
 
         #region Events
         // Events!
-        private static void Serial_ConnectSuccessfull(SerialConnectEventArgs e)
-        {
-            cWriter.WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(64, 0), 50);
-        }
-
         private static void Serial_ConnectFailure(SerialConnectEventArgs e)
         {
-            cWriter.WriteOnConsole($"SERIAL: Failed connecting. Message: {e.Exception.Message}.", new PointI(64, 0), 50);
+            cWriter.WriteOnConsole($"SERIAL: Failed connecting. Message: {e.Exception.Message}.", new PointI(64, 0), 100);
         }
 
         private static void Serial_TryConnect(SerialConnectEventArgs e)
         {
-            cWriter.WriteOnConsole($"SERIAL: Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...", new PointI(64, 0), 50);
+            cWriter.WriteOnConsole($"SERIAL: Trying to connect on {Serial.Serial.PortName} ({e.CurrentTry})...", new PointI(64, 0), 100);
         }
 
         private static void Serial_EngravingToggle(SerialCallBackEventArgs e)
@@ -44,13 +39,14 @@ namespace FTS.Core
             if (Serial == null) Serial = new SerialComms();
             Serial.TryConnect += Serial_TryConnect;
             Serial.ConnectFailure += Serial_ConnectFailure;
-            Serial.ConnectSuccessful += Serial_ConnectSuccessfull;
             Serial.EngravingToggle += Serial_EngravingToggle;
 
             if (!Serial.Open())
             {
                 throw new Exception($"Serial on {Configuration.Instance.SerialCOMPort} disconnected, cannot proceed.");
             }
+
+            Console.Clear();
 
             Task.Run(() => Serial.ListenAsync());
 
@@ -135,6 +131,7 @@ namespace FTS.Core
                 var line = Console.ReadLine();
                 var parts = line.Split(':');
                 Console.CursorVisible = false;
+                Console.Clear();
                 SuspendDraw = false;
 
                 cWriter.CleanLine(inputPos, Console.WindowWidth - 64);
@@ -206,7 +203,7 @@ namespace FTS.Core
                 var cfg = Configuration.Instance;
                 int left = 0;
                 int top = 0;
-                left += 64;
+                left += cfg.ConsoleTableDimensions.X + 2;
                 top += 3;
 
                 PointF pos = new PointF()
@@ -250,10 +247,10 @@ namespace FTS.Core
         static void drawHudElements(Memory mem, Configuration cfg)
         {
             var uInput = new PointI(cfg.UserInputArea.X - 1, cfg.UserInputArea.Y - 1);
-            cWriter.HorizontalLine(new PointI(0, 25), 62);
+            cWriter.HorizontalLine(new PointI(0, 25), cfg.ConsoleTableDimensions.X);
             cWriter.HorizontalLine(uInput, Console.WindowWidth - uInput.X);
             uInput.Y += 2;
-            cWriter.HorizontalLine(new PointI(63, 11), Console.WindowWidth - uInput.X);
+            cWriter.HorizontalLine(uInput, Console.WindowWidth - uInput.X);
             cWriter.VerticalLine(new PointI(cfg.ConsoleTableDimensions.X, 0), Console.WindowHeight);
 
             if (mem.Moving)
@@ -263,6 +260,28 @@ namespace FTS.Core
             else
             {
                 cWriter.WriteOnConsole("Press Enter for custom move...", cfg.UserInputArea, Console.WindowWidth - 64);
+            }
+
+            if (Serial is not null && Serial.Serial is not null)
+            {
+                if (Serial.Serial.IsOpen)
+                {
+                    cWriter.WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(64, 0), 50);
+                }
+                else
+                {
+                    
+                    cWriter.WriteOnConsole($"SERIAL: Connection lost to {Serial.Serial.PortName}!", new PointI(64, 0), 50);
+                    Memory.Instance.SetAlarm(AlarmReasons.ControllerDisconnected);
+
+                    // try to restablish connection after a disconnection.
+                    try
+                    {
+                        Serial.Serial.Open();
+                        Memory.Instance.ClearAlarm();
+                    }
+                    catch { }
+                }
             }
 
             // the statues on the bottom of the screen
