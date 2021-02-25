@@ -57,6 +57,8 @@ namespace FTS.Core
 
             while (currentX != X || currentY != Y)
             {
+                if (Memory.Instance.Emergency) break;
+
                 Step sX = Step.None;
                 Step sY = Step.None;
 
