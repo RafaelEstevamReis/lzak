@@ -31,9 +31,10 @@ namespace FTS.Core
         #endregion
 
         #region Run
+
+    
         public static void Run(ISerial serial = null)
         {
-            #region Initial Setups
             cWriter = new ConsoleWriterHelper(lockObj);
             Serial = serial;
             if (Serial == null) Serial = new SerialComms();
@@ -60,8 +61,6 @@ namespace FTS.Core
             // Início: não sei onde estão os motores.
             Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
             MovementManager movement = new(Serial);
-
-            #endregion
 
             #region Input loop
             while (!tk.IsCancellationRequested)
@@ -117,6 +116,18 @@ namespace FTS.Core
                         break;
                 }
             }
+
+            async void updateAsync()
+            {
+                while (!tk.IsCancellationRequested)
+                {
+                    await Task.Delay(10);
+                    checkAlarm();
+                    checkEmergency();
+                    draw();
+                }
+            }
+
             #endregion
 
             #region User manual positioning
@@ -156,45 +167,7 @@ namespace FTS.Core
                 return new PointF(0, 0);
             }
             #endregion
-
-            #region AlarmCheck
-            void checkAlarm()
-            {
-                if (Memory.Instance.PositionSteps_X > Configuration.Instance.WorkspaceMM.X)
-                {
-                    Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
-                }
-
-                if (Memory.Instance.PositionSteps_X < 0)
-                {
-                    Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
-                }
-
-                if (Memory.Instance.PositionSteps_Y > Configuration.Instance.WorkspaceMM.Y)
-                {
-                    Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
-                }
-
-                if (Memory.Instance.PositionSteps_Y < 0)
-                {
-                    Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
-                }
-
-                Memory.Instance.Idle = !Memory.Instance.Moving;
-            }
-            #endregion
-
             #region Draw
-            async void updateAsync()
-            {
-                while (!tk.IsCancellationRequested)
-                {
-                    await Task.Delay(10);
-                    checkAlarm();
-                    draw();
-                }
-            }
-
             void draw()
             {
                 if (SuspendDraw) return;
@@ -241,60 +214,94 @@ namespace FTS.Core
                 drawHudElements(mem, cfg);
             }
 
-            #endregion
-        }
-
-        static void drawHudElements(Memory mem, Configuration cfg)
-        {
-            var uInput = new PointI(cfg.UserInputArea.X - 1, cfg.UserInputArea.Y - 1);
-            cWriter.HorizontalLine(new PointI(0, 25), cfg.ConsoleTableDimensions.X);
-            cWriter.HorizontalLine(uInput, Console.WindowWidth - uInput.X);
-            uInput.Y += 2;
-            cWriter.HorizontalLine(uInput, Console.WindowWidth - uInput.X);
-            cWriter.VerticalLine(new PointI(cfg.ConsoleTableDimensions.X, 0), Console.WindowHeight);
-
-            if (mem.Moving)
+            static void drawHudElements(Memory mem, Configuration cfg)
             {
-                cWriter.WriteOnConsole($"Moving to ({mem.DestinationPosition.X:N1}, {mem.DestinationPosition.Y:N1})...", cfg.UserInputArea, Console.WindowWidth - 64);
-            }
-            else
-            {
-                cWriter.WriteOnConsole("Press Enter for custom move...", cfg.UserInputArea, Console.WindowWidth - 64);
-            }
+                var uInput = new PointI(cfg.UserInputArea.X - 1, cfg.UserInputArea.Y - 1);
+                cWriter.HorizontalLine(new PointI(0, 25), cfg.ConsoleTableDimensions.X);
+                cWriter.HorizontalLine(uInput, Console.WindowWidth - uInput.X);
+                uInput.Y += 2;
+                cWriter.HorizontalLine(uInput, Console.WindowWidth - uInput.X);
+                cWriter.VerticalLine(new PointI(cfg.ConsoleTableDimensions.X, 0), Console.WindowHeight);
 
-            if (Serial is not null && Serial.Serial is not null)
-            {
-                if (Serial.Serial.IsOpen)
+                if (mem.Moving)
                 {
-                    cWriter.WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(64, 0), 50);
+                    cWriter.WriteOnConsole($"Moving to ({mem.DestinationPosition.X:N1}, {mem.DestinationPosition.Y:N1})...", cfg.UserInputArea, Console.WindowWidth - 64);
                 }
                 else
                 {
-                    
-                    cWriter.WriteOnConsole($"SERIAL: Connection lost to {Serial.Serial.PortName}!", new PointI(64, 0), 50);
-                    Memory.Instance.SetAlarm(AlarmReasons.ControllerDisconnected);
-
-                    // try to restablish connection after a disconnection.
-                    try
-                    {
-                        Serial.Serial.Open();
-                        Memory.Instance.ClearAlarm();
-                    }
-                    catch { }
+                    cWriter.WriteOnConsole("Press Enter for custom move...", cfg.UserInputArea, Console.WindowWidth - 64);
                 }
+
+                if (Serial is not null && Serial.Serial is not null)
+                {
+                    if (Serial.Serial.IsOpen)
+                    {
+                        cWriter.WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(64, 0), 50);
+                    }
+                    else
+                    {
+
+                        cWriter.WriteOnConsole($"SERIAL: Connection lost to {Serial.Serial.PortName}!", new PointI(64, 0), 50);
+
+                        // try to restablish connection after a disconnection.
+                        try
+                        {
+                            Serial.Serial.Open();
+                        }
+                        catch { }
+                    }
+                }
+
+                // the statues on the bottom of the screen
+                var bottom = new PointI(cfg.BottomStatuses.X, cfg.BottomStatuses.Y);
+
+                cWriter.WriteOnConsole(mem.Idle ? "[IDLE]" : "[----]", bottom, 0);
+                bottom.X += 10;
+                cWriter.WriteOnConsole(mem.Moving ? "[MOVE]" : "[----]", bottom, 0);
+                bottom.X += 10;
+                cWriter.WriteOnConsole(mem.Engraving ? "[ENGR]" : "[----]", bottom, 0);
+                bottom.X += 10;
+                cWriter.WriteOnConsole(mem.Alarm ? $"[ALRM:{(int)mem.AlarmReason}]" : "[--------]", bottom, 0);
+                bottom.X += 14;
+                cWriter.WriteOnConsole(mem.Emergency ? $"[EGCY:{(int)mem.EmergencyReason}]" : "[--------]", bottom, 0);
             }
 
-            // the statues on the bottom of the screen
-            var bottom = new PointI(cfg.BottomStatuses.X, cfg.BottomStatuses.Y);
-
-            cWriter.WriteOnConsole(mem.Idle ? "[IDLE]" : "[----]", bottom, 0);
-            bottom.X += 10;
-            cWriter.WriteOnConsole(mem.Moving ? "[MOVE]" : "[----]", bottom, 0);
-            bottom.X += 10;
-            cWriter.WriteOnConsole(mem.Engraving ? "[ENGR]" : "[----]", bottom, 0);
-            bottom.X += 10;
-            cWriter.WriteOnConsole(mem.Alarm ? $"[ALRM:{(int)mem.AlarmReason}]" : "[--------]", bottom, 0);
+            #endregion
         }
+
+        #region Alarms and Emergency Checks
+        static void checkAlarm()
+        {
+            if (Memory.Instance.PositionSteps_X > MathHelper.MillimitersToSteps(Configuration.Instance.WorkspaceMM.X, Configuration.Instance.StepsPerMillimiter_X))
+            {
+                Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
+            }
+
+            if (Memory.Instance.PositionSteps_X < 0)
+            {
+                Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
+            }
+
+            if (Memory.Instance.PositionSteps_Y > MathHelper.MillimitersToSteps(Configuration.Instance.WorkspaceMM.Y, Configuration.Instance.StepsPerMillimiter_X))
+            {
+                Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
+            }
+
+            if (Memory.Instance.PositionSteps_Y < 0)
+            {
+                Memory.Instance.SetAlarm(AlarmReasons.MoveOutOfBounds);
+            }
+
+            Memory.Instance.Idle = !Memory.Instance.Moving;
+        }
+        static void checkEmergency()
+        {
+            if (!Serial.Serial.IsOpen)
+            {
+                Memory.Instance.SetEmergency(EmergencyReasons.ConnectionLost);
+            }
+        }
+        #endregion
         #endregion
     }
 }
