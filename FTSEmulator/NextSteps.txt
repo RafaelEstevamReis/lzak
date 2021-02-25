@@ -14,12 +14,17 @@ CORRIGIR:
 
 IMPLEMENTAR:
 {
-	- Adicionar compatibilidade com Driver (A4988)
+	- Escrever sketch que faz o motor travar e andar...
 
-	Lista de compras:
-	- Driver
-	- Stepper motor
-	- Capacitor 50V 100mF (uns 5)
-	- pin headers (macho e fêmea)
-	- conectores modu (alojamento e barra) e KK (alojamento e barra)
+	- Adicionar compatibilidade com Driver (A4988) ??????
+
+	DONE
+	{
+		Lista de compras:
+		- Driver
+		- Stepper motor
+		- Capacitor 50V 100mF (uns 5)
+		- pin headers (macho e fêmea)
+		- conectores modu (alojamento e barra) e KK (alojamento e barra)
+	}
 }
