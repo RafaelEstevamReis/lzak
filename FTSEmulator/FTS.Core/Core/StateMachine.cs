@@ -9,6 +9,7 @@ namespace FTS.Core
         static bool SuspendDraw = false;
         static CancellationTokenSource CancellationSource = new();
         static ISerial Serial;
+        static IDriver Driver;
         static object lockObj = new object();
         static ConsoleWriterHelper cWriter;
 
@@ -31,13 +32,14 @@ namespace FTS.Core
         #endregion
 
         #region Run
-
-    
-        public static void Run(ISerial serial = null)
+        public static void Run(ISerial serial = null, IDriver driver = null)
         {
             cWriter = new ConsoleWriterHelper(lockObj);
             Serial = serial;
-            if (Serial == null) Serial = new SerialComms();
+            Driver = driver;
+            if (Serial is null) Serial = new SerialComms();
+            if (Driver is null) Driver = new A4988();
+
             Serial.TryConnect += Serial_TryConnect;
             Serial.ConnectFailure += Serial_ConnectFailure;
             Serial.EngravingToggle += Serial_EngravingToggle;
@@ -60,7 +62,7 @@ namespace FTS.Core
 
             // Início: não sei onde estão os motores.
             Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
-            MovementManager movement = new(Serial);
+            MovementManager movement = new(Serial, Driver);
 
             #region Input loop
             while (!tk.IsCancellationRequested)
@@ -145,7 +147,7 @@ namespace FTS.Core
                 Console.Clear();
                 SuspendDraw = false;
 
-                cWriter.CleanLine(inputPos, Console.WindowWidth - 64);
+                cWriter.ClearLine(inputPos, Console.WindowWidth - 64);
 
                 try
                 {
@@ -232,24 +234,23 @@ namespace FTS.Core
                     cWriter.WriteOnConsole("Press Enter for custom move...", cfg.UserInputArea, Console.WindowWidth - 64);
                 }
 
-                if (Serial is not null && Serial.Serial is not null)
+                cWriter.WriteOnConsole($"DRIVER: {Driver.GetType().Name}", new PointI(62, 1), 50);
+
+                if (Serial.Serial.IsOpen)
                 {
-                    if (Serial.Serial.IsOpen)
-                    {
-                        cWriter.WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(64, 0), 50);
-                    }
-                    else
-                    {
+                    cWriter.WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(62, 0), 50);
+                }
+                else
+                {
 
-                        cWriter.WriteOnConsole($"SERIAL: Connection lost to {Serial.Serial.PortName}!", new PointI(64, 0), 50);
+                    cWriter.WriteOnConsole($"SERIAL: Connection lost to {Serial.Serial.PortName}!", new PointI(62, 0), 50);
 
-                        // try to restablish connection after a disconnection.
-                        try
-                        {
-                            Serial.Serial.Open();
-                        }
-                        catch { }
+                    // try to restablish connection after a disconnection.
+                    try
+                    {
+                        Serial.Serial.Open();
                     }
+                    catch { }
                 }
 
                 // the statues on the bottom of the screen
@@ -299,6 +300,7 @@ namespace FTS.Core
             if (!Serial.Serial.IsOpen)
             {
                 Memory.Instance.SetEmergency(EmergencyReasons.ConnectionLost);
+                Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
             }
         }
         #endregion
