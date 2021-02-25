@@ -32,7 +32,7 @@ namespace FTS.Core
             ConsoleTableDimensions = new PointI(60, 25);
 
             UserInputArea = new PointI(ConsoleTableDimensions.X + 2, 10);
-            BottomStatuses = new PointI(8, 26);
+            BottomStatuses = new PointI(2, 26);
 
             // serial
             SerialBaudRate = 9600;
