@@ -13,17 +13,22 @@ namespace FTS.Core
         Configuration Config;
         public bool IsOpen { get; set; }
 
+        public IDriver Driver { get; }
+
         public event OnTryConnect TryConnect;
         public event OnConnectSuccessful ConnectSuccessful;
         public event OnConnectFailure ConnectFailure;
 
         public event OnEngravingToggle EngravingToggle;
 
-        public SerialComms()
+        public SerialComms(IDriver Driver = null)
         {
             Config = Configuration.Instance;
 
-            if (Config is null) throw new ArgumentException("config cannot be null.");
+            // TODO
+            // I do not understand what would vary between drivers.
+            // Hence, added support so it'll be implemented soon.
+            if (Driver is null) Driver = new A4988();
 
             Serial = new SerialPort(Config.SerialCOMPort,
                                     Config.SerialBaudRate,
