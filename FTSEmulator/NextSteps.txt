@@ -9,7 +9,7 @@ CORRIGIR:
 
 	- UnitTests Math
 
-	- colocar os desenhos em tela em uma função só
+	- colocar os desenhos em tela em uma função só - OK
 }
 
 IMPLEMENTAR:
