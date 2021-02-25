@@ -2,6 +2,7 @@
 {
     public enum EmergencyReasons
     {
-        ENDSTOPActivated = 101
+        ENDSTOPActivated = 101,
+        ConnectionLost = 102
     }
 }
