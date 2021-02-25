@@ -7,11 +7,13 @@ namespace FTS.Core
     {
         Configuration config;
         ISerial Serial;
+        IDriver Driver;
 
-        public MovementManager(ISerial Serial)
+        public MovementManager(ISerial Serial, IDriver Driver)
         {
             config = Configuration.Instance;
             this.Serial = Serial;
+            this.Driver = Driver;
         }
         // in mm
         public void MoveTo(float X, float Y)
@@ -57,7 +59,10 @@ namespace FTS.Core
 
             while (currentX != X || currentY != Y)
             {
+                // has something happened? Immediately stops.
                 if (Memory.Instance.Emergency) break;
+
+                // TODO add key or command for triggering emergency stop 
 
                 Step sX = Step.None;
                 Step sY = Step.None;
