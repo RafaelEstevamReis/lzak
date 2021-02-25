@@ -29,8 +29,9 @@ namespace FTS.Core
         private Configuration()
         {
             // draw
-            UserInputArea = new PointI(64, 10);
-            ConsoleTableDimensions = new PointI(62, 25);
+            ConsoleTableDimensions = new PointI(60, 25);
+
+            UserInputArea = new PointI(ConsoleTableDimensions.X + 2, 10);
             BottomStatuses = new PointI(8, 26);
 
             // serial
@@ -41,9 +42,9 @@ namespace FTS.Core
             SerialDataBits = 8;
             SerialStopBits = StopBits.One;
 
-            StepsPerMillimiter_X = 1;
-            StepsPerMillimiter_Y = 1;
-            StepsPerMillimiter_Z = 1;
+            StepsPerMillimiter_X = 10;
+            StepsPerMillimiter_Y = 10;
+            StepsPerMillimiter_Z = 10;
 
             WorkspaceMM = new PointF()
             {
