@@ -34,15 +34,13 @@ void setup()
 
 void loop() 
 {
-  while(true)
-  {
    // Switch do endstop
    int endStopValue = analogRead(A3);
    
    if(endStopValue < ENDSTOP_THRESHOLD) 
    {
       Serial.println((String)"STOP(" + endStopValue + ")");
-      continue;
+      return;
    }
    
   if(Serial.available() > 0)
@@ -69,8 +67,15 @@ void loop()
       }
     }
   }
-
-  for(int i = 0; i < QTD_LEDS; i++)
+  // Set Dirs
+  for(int i = 1; i < QTD_LEDS; i+=2)
+  {
+    digitalWrite(pins[i], values[i]);
+    Serial.println(values[i]);
+  }
+  delayMicroseconds(50);
+  // Do steps
+  for(int i = 0; i < QTD_LEDS; i+=2)
   {
     digitalWrite(pins[i], values[i]);
     Serial.println(values[i]);
@@ -78,5 +83,4 @@ void loop()
   
   //Serial.print();
   delayMicroseconds(50);
-  }
 }
