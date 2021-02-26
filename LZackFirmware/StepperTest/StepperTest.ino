@@ -12,13 +12,13 @@ int dir = 0;
 
 void loop() {
   // put your main code here, to run repeatedly:
-  delay(100);
+  delay(1);
 
-  if(steps++ > 50) {
+  if(steps++ >= 200) {
     steps = 0;
     
-    //if(dir == 1) dir = 0;
-    //else dir = 1;
+    if(dir == 1) dir = 0;
+    else dir = 1;
   }
   digitalWrite(DIR_PIN, dir);
   delay(1);
