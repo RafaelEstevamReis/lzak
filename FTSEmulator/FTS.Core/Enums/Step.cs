@@ -3,7 +3,7 @@
     public enum Step
     {
         StepLeft = 1,
-        StepRight = 2,
+        StepRight = 3,
         None = 0,
     }
 }
