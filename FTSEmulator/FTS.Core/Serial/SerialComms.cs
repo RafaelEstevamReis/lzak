@@ -28,6 +28,8 @@ namespace FTS.Core
             // TODO
             // I do not understand what would vary between drivers.
             // Hence, added support so it'll be implemented soon.
+            // remove driver support, those two drivers are the same
+
             if (Driver is null) Driver = new A4988();
 
             Serial = new SerialPort(Config.SerialCOMPort,
@@ -103,6 +105,8 @@ namespace FTS.Core
                 //... followed by powering down the pins
                 bw.Write((byte)0x00);
                 bw.Flush();
+
+                // TODO leave power down to firmware!
             }
             catch 
             {
