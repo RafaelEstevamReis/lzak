@@ -61,6 +61,7 @@ namespace FTS.Core
                 if (Memory.Instance.Emergency) break;
 
                 // TODO add key or command for triggering emergency stop 
+                // gonna do this on latter versions
 
                 Step sX = Step.None;
                 Step sY = Step.None;
