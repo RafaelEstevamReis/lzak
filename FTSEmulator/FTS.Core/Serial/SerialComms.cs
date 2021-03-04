@@ -23,11 +23,6 @@ namespace FTS.Core
         {
             Config = Configuration.Instance;
 
-            // TODO
-            // I do not understand what would vary between drivers.
-            // Hence, added support so it'll be implemented soon.
-            // remove driver support, those two drivers are the same
-
             Serial = new SerialPort(Config.SerialCOMPort,
                                     Config.SerialBaudRate,
                                     Config.SerialParity,
@@ -87,9 +82,6 @@ namespace FTS.Core
                         (bY << 2) +
                          bZ;
 
-                // TODO isso ta errado. Eu não entendi direito como devo sempre piscar 
-                // uma porta pra passo e outra pra direção (aceso = direita, apagado = esquerda, por exemplo)
-
                 // first, the binaryWriter has to write current instruction
                 // That means turning given pins on.
                 bw.Write((byte)b);
@@ -97,12 +89,6 @@ namespace FTS.Core
 
                 // then wait a tad... 
                 Thread.Sleep(1);
-
-                //... followed by powering down the pins
-                bw.Write((byte)0x00);
-                bw.Flush();
-
-                // TODO leave power down to firmware!
             }
             catch 
             {
