@@ -7,13 +7,11 @@ namespace FTS.Core
     {
         Configuration config;
         ISerial Serial;
-        IDriver Driver;
 
-        public MovementManager(ISerial Serial, IDriver Driver)
+        public MovementManager(ISerial Serial)
         {
             config = Configuration.Instance;
             this.Serial = Serial;
-            this.Driver = Driver;
         }
         // in mm
         public void MoveTo(float X, float Y)

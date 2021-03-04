@@ -13,15 +13,13 @@ namespace FTS.Core
         Configuration Config;
         public bool IsOpen { get; set; }
 
-        public IDriver Driver { get; }
-
         public event OnTryConnect TryConnect;
         public event OnConnectSuccessful ConnectSuccessful;
         public event OnConnectFailure ConnectFailure;
 
         public event OnEngravingToggle EngravingToggle;
 
-        public SerialComms(IDriver Driver = null)
+        public SerialComms()
         {
             Config = Configuration.Instance;
 
@@ -29,8 +27,6 @@ namespace FTS.Core
             // I do not understand what would vary between drivers.
             // Hence, added support so it'll be implemented soon.
             // remove driver support, those two drivers are the same
-
-            if (Driver is null) Driver = new A4988();
 
             Serial = new SerialPort(Config.SerialCOMPort,
                                     Config.SerialBaudRate,

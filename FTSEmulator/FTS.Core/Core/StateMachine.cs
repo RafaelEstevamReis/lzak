@@ -9,7 +9,6 @@ namespace FTS.Core
         static bool SuspendDraw = false;
         static CancellationTokenSource CancellationSource = new();
         static ISerial Serial;
-        static IDriver Driver;
         static object lockObj = new object();
         static ConsoleWriterHelper cWriter;
 
@@ -32,13 +31,11 @@ namespace FTS.Core
         #endregion
 
         #region Run
-        public static void Run(ISerial serial = null, IDriver driver = null)
+        public static void Run(ISerial serial = null)
         {
             cWriter = new ConsoleWriterHelper(lockObj);
             Serial = serial;
-            Driver = driver;
             if (Serial is null) Serial = new SerialComms();
-            if (Driver is null) Driver = new A4988();
 
             Serial.TryConnect += Serial_TryConnect;
             Serial.ConnectFailure += Serial_ConnectFailure;
@@ -62,7 +59,7 @@ namespace FTS.Core
 
             // Início: não sei onde estão os motores.
             Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
-            MovementManager movement = new(Serial, Driver);
+            MovementManager movement = new(Serial);
 
             #region Input loop
             while (!tk.IsCancellationRequested)
@@ -109,8 +106,6 @@ namespace FTS.Core
                         break;
 
                     case ConsoleKey.Enter:
-                        //if (Memory.Instance.Alarm) System.Diagnostics.Debugger.Break();
-
                         PointF destination = getCustomPointFromInput(out bool valid);
                         if (!valid) continue;
                         Memory.Instance.DestinationPosition = destination;
@@ -127,6 +122,7 @@ namespace FTS.Core
                     checkAlarm();
                     checkEmergency();
                     draw();
+                    tryReconnectSerial();
                 }
             }
 
@@ -215,7 +211,6 @@ namespace FTS.Core
                 // the hud elements
                 drawHudElements(mem, cfg);
             }
-
             static void drawHudElements(Memory mem, Configuration cfg)
             {
                 var uInput = new PointI(cfg.UserInputArea.X - 1, cfg.UserInputArea.Y - 1);
@@ -234,9 +229,7 @@ namespace FTS.Core
                     cWriter.WriteOnConsole("Press Enter for custom move...", cfg.UserInputArea, Console.WindowWidth - 64);
                 }
 
-                cWriter.WriteOnConsole($"DRIVER: {Driver.GetType().Name}", new PointI(62, 1), 50);
-
-                if (Serial.Serial.IsOpen)
+                if (Serial.IsOpen)
                 {
                     cWriter.WriteOnConsole($"SERIAL: Connected on {Serial.Serial.PortName}!", new PointI(62, 0), 50);
                 }
@@ -244,13 +237,6 @@ namespace FTS.Core
                 {
 
                     cWriter.WriteOnConsole($"SERIAL: Connection lost to {Serial.Serial.PortName}!", new PointI(62, 0), 50);
-
-                    // try to restablish connection after a disconnection.
-                    try
-                    {
-                        Serial.Serial.Open();
-                    }
-                    catch { }
                 }
 
                 // the statues on the bottom of the screen
@@ -266,11 +252,19 @@ namespace FTS.Core
                 bottom.X += 14;
                 cWriter.WriteOnConsole(mem.Emergency ? $"[EGCY:{(int)mem.EmergencyReason}]" : "[--------]", bottom, 0);
             }
-
             #endregion
         }
 
         #region Alarms and Emergency Checks
+        private static void tryReconnectSerial()
+        {
+            // try to restablish connection after a disconnection.
+            try
+            {
+                Serial.Serial.Open();
+            }
+            catch { }
+        }
         static void checkAlarm()
         {
             if (Memory.Instance.PositionSteps_X > MathHelper.MillimitersToSteps(Configuration.Instance.WorkspaceMM.X, Configuration.Instance.StepsPerMillimiter_X))
@@ -297,7 +291,7 @@ namespace FTS.Core
         }
         static void checkEmergency()
         {
-            if (!Serial.Serial.IsOpen)
+            if (!Serial.IsOpen)
             {
                 Memory.Instance.SetEmergency(EmergencyReasons.ConnectionLost);
                 Memory.Instance.SetAlarm(AlarmReasons.UnkownCurrentLocation);
