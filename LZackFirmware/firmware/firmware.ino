@@ -1,29 +1,44 @@
+// Z Motor
 #define Y1_B 0b00000001
 #define Y2_B 0b00000010
-#define G1_B 0b00000100
-#define G2_B 0b00001000
-#define R1_B 0b00010000
-#define R2_B 0b00100000
-
 #define Y1_P 0
 #define Y2_P 1
+
+// Y Motor
+#define G1_B 0b00000100
+#define G2_B 0b00001000
 #define G1_P 2
 #define G2_P 3
+
+// X Motor
+#define R1_B 0b00010000
+#define R2_B 0b00100000
 #define R1_P 4
 #define R2_P 5
 
-#define QTD_LEDS 6
+#define ENABLE_MOTORS 8
+
+#define QTD_PINS 6
 #define ENDSTOP_THRESHOLD 500
 
-int  pins[QTD_LEDS] =   { 9, 8, 7, 6, 5, 4 }; // arduino de vdd
-bool values[QTD_LEDS];
+//int  pins[QTD_PINS] =  { 9, 8, 7, 6, 5, 4 }; // arduino leonardo pro micro
 
+//CNC Shield
+//int  pins[QTD_PINS] =  { 5, 2, 6, 3, 7, 4 };
+//int  pins[QTD_PINS] =  { 2, 5, 3, 6, 4, 7 };
+//                      ZS ZD YS YD XS XD
+int  pins[QTD_PINS] =  { 4, 7, 3, 6, 2, 5 };
+
+bool values[QTD_PINS];
 
 void setup() 
 {
-  pinMode(A3, INPUT_PULLUP);
+  //pinMode(A3, INPUT_PULLUP);
   
-  for(int i = 0; i < QTD_LEDS;i++)
+  pinMode(ENABLE_MOTORS, OUTPUT);
+  digitalWrite(ENABLE_MOTORS, LOW);
+  
+  for(int i = 0; i < QTD_PINS;i++)
   {
     pinMode(pins[i], OUTPUT);
     values[i] = 0;
@@ -36,8 +51,8 @@ bool wasLastLoopStopped = false;
 void loop() 
 {
   // Switch do endstop
-  int endStopValue = analogRead(A3);
-
+  //int endStopValue = analogRead(A3);
+/*
   if(endStopValue < ENDSTOP_THRESHOLD) 
   { 
     if(wasLastLoopStopped) return;
@@ -47,7 +62,7 @@ void loop()
     return;
   }
   else { wasLastLoopStopped = false; }
-  
+  */
   if(Serial.available() > 0)
   {
     int received = Serial.read();
@@ -87,7 +102,7 @@ void loop()
 void pinAction(bool reset)
 {
   // Set Dirs
-  for(int i = 1; i < QTD_LEDS; i+=2)
+  for(int i = 1; i < QTD_PINS; i+=2)
   {
     if(reset) values[i] = 0b00000000;
     
@@ -96,7 +111,7 @@ void pinAction(bool reset)
   }
   delayMicroseconds(50);
   // Do steps
-  for(int i = 0; i < QTD_LEDS; i+=2)
+  for(int i = 0; i < QTD_PINS; i+=2)
   {
     if(reset) values[i] = 0b00000000;
 
