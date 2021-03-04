@@ -87,8 +87,3 @@ namespace FTS.Core
         }
     }
 }
-
-
-// y = verde
-// x = vermelha
-// acho que a amarela é a z
