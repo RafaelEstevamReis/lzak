@@ -80,7 +80,7 @@ namespace FTS.Core
                 }
 
                 Serial.Move(sX, sY, Step.None);
-                Thread.Sleep(50);
+                Thread.Sleep(0);
             }
 
             Memory.Instance.Moving = false;

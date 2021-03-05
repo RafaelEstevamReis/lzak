@@ -26,6 +26,7 @@ namespace FTS.Core
 
         private static void Serial_EngravingToggle(SerialCallBackEventArgs e)
         {
+            // TODO verificar esta bagaça
             //Memory.Instance.SetEmergency(EmergencyReasons.ENDSTOPActivated);
         }
         #endregion

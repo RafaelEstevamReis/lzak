@@ -44,7 +44,7 @@ void setup()
     values[i] = 0;
   }
   
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 bool wasLastLoopStopped = false;
@@ -107,7 +107,7 @@ void pinAction(bool reset)
     if(reset) values[i] = 0b00000000;
     
     digitalWrite(pins[i], values[i]);
-    Serial.println(values[i]);
+    //Serial.println(values[i]);
   }
   delayMicroseconds(50);
   // Do steps
@@ -116,6 +116,6 @@ void pinAction(bool reset)
     if(reset) values[i] = 0b00000000;
 
     digitalWrite(pins[i], values[i]);
-    Serial.println(values[i]);
+    //Serial.println(values[i]);
   }
 }

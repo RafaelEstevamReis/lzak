@@ -28,3 +28,20 @@ IMPLEMENTAR:
 		- conectores modu (alojamento e barra) e KK (alojamento e barra)
 	}
 }
+
+
+--------
+
+
+cálculo de steps -> mm do X
+
+12,48mm a cada 10 barras
+
+= 1,25mm/barras
+
+= 1,25mm/volta
+
+200 passos/volta
+
+
+= 160p/mm
