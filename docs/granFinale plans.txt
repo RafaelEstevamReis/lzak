@@ -1,0 +1,13 @@
+NOVA IMPLEMENTAÇÃO
+
+3 partes: 
+1. Fw -> interpretações de bits enviados via serial;
+	  -> opera o endstop e notifica 
+	  -> recebe instrução, distribui aos pinos corretos e desativa os pinos de step
+	  
+2. Controller -> recebe GCODE e envia pro fw
+                  -> Tanto interativo, quanto via arquivo
+				  -> implementar suporte a controle efeito WOW (comunicação direta com o fw, não gerar GCODE)
+						-> Implementar à parte primeiro em outro exe.
+				  
+3. Host -> Recebe imagem e transforma em GCODE
