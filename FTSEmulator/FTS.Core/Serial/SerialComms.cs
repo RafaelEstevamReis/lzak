@@ -85,6 +85,7 @@ namespace FTS.Core
                 // first, the binaryWriter has to write current instruction
                 // That means turning given pins on.
                 bw.Write((byte)b);
+                // always flush before you leave.
                 bw.Flush();
 
                 // then wait a tad... 
