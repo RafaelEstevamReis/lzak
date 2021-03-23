@@ -21,20 +21,29 @@
 #define QTD_PINS 6
 #define ENDSTOP_THRESHOLD 500
 
-//int  pins[QTD_PINS] =  { 9, 8, 7, 6, 5, 4 }; // arduino leonardo pro micro
+#define BAUD_RATE 9600
 
+//int  pins[QTD_PINS] =  { 9, 8, 7, 6, 5, 4 }; // arduino leonardo pro micro
 //CNC Shield
 //int  pins[QTD_PINS] =  { 5, 2, 6, 3, 7, 4 };
 //int  pins[QTD_PINS] =  { 2, 5, 3, 6, 4, 7 };
 //                      ZS ZD YS YD XS XD
 int  pins[QTD_PINS] =  { 4, 7, 3, 6, 2, 5 };
-
 bool values[QTD_PINS];
+
+void printStatusSerial()
+{
+  Serial.println("---LZak Fw---");
+  
+  Serial.print("Baud rate: ");
+  Serial.println(BAUD_RATE);
+}
 
 void setup() 
 {
-  //pinMode(A3, INPUT_PULLUP);
-  
+  Serial.begin(BAUD_RATE);
+  printStatusSerial();
+
   pinMode(ENABLE_MOTORS, OUTPUT);
   digitalWrite(ENABLE_MOTORS, LOW);
   
@@ -43,26 +52,12 @@ void setup()
     pinMode(pins[i], OUTPUT);
     values[i] = 0;
   }
-  
-  Serial.begin(115200);
 }
 
-bool wasLastLoopStopped = false;
 void loop() 
 {
-  // Switch do endstop
-  //int endStopValue = analogRead(A3);
-/*
-  if(endStopValue < ENDSTOP_THRESHOLD) 
-  { 
-    if(wasLastLoopStopped) return;
+  // Switch do endstop vai aqui
 
-    Serial.print("Stopped!");
-    wasLastLoopStopped = true;
-    return;
-  }
-  else { wasLastLoopStopped = false; }
-  */
   if(Serial.available() > 0)
   {
     int received = Serial.read();
@@ -89,33 +84,35 @@ void loop()
   }
 
   // send instruction to motors
-  pinAction(false);
+  pinPulse();
 
-  // power down pins
-  pinAction(true);
-
-  
-  //Serial.print();
-  delayMicroseconds(50);
+  //delayMicroseconds(50);
 }
 
-void pinAction(bool reset)
-{
-  // Set Dirs
-  for(int i = 1; i < QTD_PINS; i+=2)
-  {
-    if(reset) values[i] = 0b00000000;
-    
-    digitalWrite(pins[i], values[i]);
-    //Serial.println(values[i]);
-  }
-  delayMicroseconds(50);
-  // Do steps
-  for(int i = 0; i < QTD_PINS; i+=2)
-  {
-    if(reset) values[i] = 0b00000000;
 
+// Datasheet A4288
+// pg6
+// dir setup time: 200ns => 0,2us
+// step min pulse: 1us
+
+void pinPulse(){
+  // Set Dirs
+  for(int i = 1; i < QTD_PINS; i+=2){
     digitalWrite(pins[i], values[i]);
-    //Serial.println(values[i]);
+  }
+  // wait dir setup time
+  delayMicroseconds(50);
+  
+  // Do steps
+  for(int i = 0; i < QTD_PINS; i+=2){
+    // por definição, todos estão em LOW antes
+    //if(values[i] == LOW) continue;
+    digitalWrite(pins[i], values[i]);
+  }
+  // wait step pulse
+  delayMicroseconds(50);
+  // pulse LOW
+  for(int i = 0; i < QTD_PINS; i+=2){
+    digitalWrite(pins[i], 0);
   }
 }
