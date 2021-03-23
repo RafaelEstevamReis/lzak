@@ -35,15 +35,15 @@ namespace FTS.Core
             BottomStatuses = new PointI(2, 26);
 
             // serial
-            SerialBaudRate = 115200;
-            SerialCOMPort = "COM8";
+            SerialBaudRate = 9600;
+            SerialCOMPort = "COM7";
             SerialMaxCnnTries = 10;
             SerialParity = Parity.None;
             SerialDataBits = 8;
             SerialStopBits = StopBits.One;
 
-            StepsPerMillimiter_X = 160;
-            StepsPerMillimiter_Y = 10;
+            StepsPerMillimiter_X = 100;
+            StepsPerMillimiter_Y = 100;
             StepsPerMillimiter_Z = 10;
 
             WorkspaceMM = new PointF()
