@@ -21,15 +21,17 @@ namespace HostApp
             // second: see if its format is allowed or supported
             Memory.CurrentImageType = loadFileType();
 
-            // the, get its file extensio as it's on the file name
+            // the, get its file extension as it's on the file name
             Memory.CurrentImageExtension = loadFileExtension();
 
             // file verifications
             preloadChecks();
 
-            var gCode = Memory.CurrentImage.ToBlackWhite() // then, transform the image to black and white
-                                           .ToBooleanArray()      // then, create an array of booleans: black = true; white = false.
-                                           .ToGCODE();            // finally, transform said boolean array into GCODE.
+            var gCode = Memory.CurrentImage.ToBlackAndWhite()   // then, transform the image to black and white
+                                           .ToBooleanArray() // then, create an array of booleans: black = true; white = false.
+                                           .ToGCODE();       // finally, transform said boolean array into GCODE.
+
+            gCode = gCode;
         }
 
         Image loadImageFile()

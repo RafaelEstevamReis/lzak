@@ -15,7 +15,7 @@
             AllowPNG = true;
             AllowJPEG = true;
 
-            ImagePath = "pic.jpg";
+            ImagePath = "pic2.jpg";
         }
     }
 }

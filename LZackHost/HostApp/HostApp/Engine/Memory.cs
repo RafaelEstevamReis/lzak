@@ -9,9 +9,6 @@ namespace HostApp
         public ImageTypes CurrentImageType { get; set; }
         public string CurrentImageExtension { get; set; }
 
-        public Memory()
-        {
-
-        }
+        public Memory() { }
     }
 }
