@@ -1,18 +1,18 @@
-# L'zack Laser CNC
+# L'zak Laser CNC
 
 The goal for this project is to create two-piece software suite for CNC machines as a final project, required for my school graduation. It is composed by the firmware and the host software.
 
 ------
-- [L'zack Laser CNC](#lzack-laser-cnc)
+- [L'zak Laser CNC](#lzak-laser-cnc)
   - [Projects](#projects)
   - [Documentation](#documentation)
   - [Work in progress](#work-in-progress)
   - [Glossary](#glossary)
   - [FTS Emulator](#fts-emulator)
     - [What is it ?](#what-is-it-)
-  - [L'Zack Host](#lzack-host)
+  - [L'zak Host](#lzak-host)
     - [What is it ?](#what-is-it--1)
-  - [L'Zack Firmware](#lzack-firmware)
+  - [L'zak Firmware](#lzak-firmware)
     - [What is it ?](#what-is-it--2)
 
 ## Projects
@@ -21,8 +21,8 @@ The goal for this project is to create two-piece software suite for CNC machines
 |-----------------|-----------------------|---------|
 | docs            | Documentation website | [None]  |
 | [FTS Emulator](https://github.com/RafaelEstevamReis/lzak/tree/main/FTSEmulator) | ` Fast Testing Suite` _Emulator_ | [None]  |
-| [L'Zack Host](https://github.com/RafaelEstevamReis/lzak/tree/main/LZackHost)     | CNC Host software     | [None]  |
-| [L'Zack Firmware](https://github.com/RafaelEstevamReis/lzak/tree/main/LZackFirmware) | CNC firmware          | [None]  |
+| [L'zak Host](https://github.com/RafaelEstevamReis/lzak/tree/main/LzakHost)     | CNC Host software     | [None]  |
+| [L'zak Firmware](https://github.com/RafaelEstevamReis/lzak/tree/main/LzakFirmware) | CNC firmware          | [None]  |
 
 
 ## Documentation
@@ -58,13 +58,13 @@ At this time any collaboration is limited
 The Fast Testing Suite will work as a CNC hardware emulator. The objective is to provide a computer solution that enables an easy-to-use, easy-to-test environment by mimicking a three-axis CNC machine, including the stepper motor hardware controller, the limit switches and all the needed features. This will allow for development even while the machine is not physically available; also, avoids hardware damage in case of in-development bugs.
 
 
-## L'Zack Host
+## L'zak Host
 
 ### What is it ?
 
 Host description
 
-## L'Zack Firmware
+## L'zak Firmware
 
 ### What is it ?
 
