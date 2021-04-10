@@ -1,8 +1,9 @@
-﻿using ControllerApp.Enums;
+﻿using ControllerApp.CustomEventArgs;
+using ControllerApp.Enums;
 using ControllerApp.Helpers;
 using ControllerApp.Interfaces;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Ports;
 using System.Threading;
@@ -18,10 +19,10 @@ namespace ControllerApp.Core
         public object LockObj;
 
         // Writer instance. Semaphore is enabled
-        public readonly ConsoleWriteHelper ConsoleWriter;
+        public readonly ConsoleHelper ConsoleWriter;
 
         // message handlers
-        public Queue<string> LogMessageStore { get; set; }
+        public ConcurrentQueue<string> LogMessageQueue { get; set; }
 
         public string GCODE { get; set; }
 
@@ -63,6 +64,8 @@ namespace ControllerApp.Core
         public bool Alarm { get; set; }
         public AlarmReasons AlarmReason { get; set; }
 
+        public MessageSinkEventArgs MessageSink { get; set; }
+
         public Memory(IConfiguration Config)
         {
             this.Config = Config;
@@ -72,7 +75,7 @@ namespace ControllerApp.Core
             ShutdownToken = new();
             Motor = new(this);
 
-            LogMessageStore = new Queue<string>();
+            LogMessageQueue = new();
 
             KeyPressed = 0x00;
             WroteNothingLastRound = false;
