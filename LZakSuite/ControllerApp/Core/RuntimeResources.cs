@@ -1,5 +1,4 @@
-﻿using ControllerApp.MathResources;
-using System;
+﻿using System;
 using System.Text;
 using System.Threading;
 
@@ -15,8 +14,6 @@ namespace ControllerApp.Core
         {
             int currentTry = 1;
             bool wasOpen = false;
-            Point statusPosition = new Point(60, 20);
-            int cleanLen = 55;
 
             string connectedMsg = $"Serial open at ({memory.Config.SerialCOMPort}).";
 
@@ -39,12 +36,12 @@ namespace ControllerApp.Core
 
                 try
                 {
-                    memory.ConsoleWriter.Write(connectionMsg, statusPosition, cleanBeforeWrite: cleanLen);
+                    memory.LogMessageQueue.Enqueue(connectionMsg);
+                    // memory.ConsoleWriter.Write(connectionMsg, statusPosition, cleanBeforeWrite: cleanLen);
                     memory.Serial.Open();
                     wasOpen = true;
-                    memory.ConsoleWriter.Write(connectedMsg,
-                                               statusPosition,
-                                               cleanBeforeWrite: cleanLen);
+                    memory.LogMessageQueue.Enqueue(connectedMsg);
+                    // memory.ConsoleWriter.Write(connectedMsg,statusPosition, cleanBeforeWrite: cleanLen);
                     memory.ClearEmergency();
                     currentTry = 1;
                 }
@@ -56,21 +53,9 @@ namespace ControllerApp.Core
             }
         }
 
-        /// <summary>
-        /// Enables keyboard interaction during a lengthy movement operation.
-        /// </summary>
-        /// <param name="memory">The main software memory instance.</param>
-        /// <param name="token">Cancellation token for killing this execution once movement stops.</param>
-        public static void KeyboardListen(Memory memory, CancellationToken token)
+        internal static void MessageEventsListen(Memory memory)
         {
-            while (!token.IsCancellationRequested)
-            {
-                if (!Console.KeyAvailable) continue;
-
-                var k = Console.ReadKey(true).Key;
-                if (k == memory.Config.Reset) memory.ResetFirmwareKeyPressed = true;
-                if (k == memory.Config.Halt) memory.HaltKeyPressed = true;
-            }
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -92,11 +77,30 @@ namespace ControllerApp.Core
                             var message = Encoding.UTF8.GetString(buffer);
                             message = message.Replace("\0", "");
 
-                            memory.LogMessageStore.Enqueue(message);
+                            var split = message.Split("\r\n");
+
+                            foreach(var item in split) memory.LogMessageQueue.Enqueue(message);
                         }
                     }
                     catch { }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Enables keyboard interaction during a lengthy movement operation.
+        /// </summary>
+        /// <param name="memory">The main software memory instance.</param>
+        /// <param name="token">Cancellation token for killing this execution once movement stops.</param>
+        public static void KeyboardListen(Memory memory, CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                if (!Console.KeyAvailable) continue;
+
+                var k = Console.ReadKey(true).Key;
+                if (k == memory.Config.Reset) memory.ResetFirmwareKeyPressed = true;
+                if (k == memory.Config.Halt) memory.HaltKeyPressed = true;
             }
         }
 
@@ -112,7 +116,7 @@ namespace ControllerApp.Core
             // nothing is happening, no key was pressed
             if (memory.KeyPressed == memory.Config.NoOperation)
             {
-                if (!memory.WroteNothingLastRound) memory.LogMessageStore.Enqueue($"STOPPED");
+                if (!memory.WroteNothingLastRound) memory.LogMessageQueue.Enqueue($"STOPPED");
                 memory.WroteNothingLastRound = true;
             }
 
@@ -125,7 +129,7 @@ namespace ControllerApp.Core
             if (memory.KeyPressed == memory.Config.End)
             {
                 memory.ShutdownToken.Cancel();
-                memory.LogMessageStore.Enqueue("STOPPING");
+                memory.LogMessageQueue.Enqueue("STOPPING");
                 Thread.Sleep(3000);
             }
 
@@ -150,28 +154,28 @@ namespace ControllerApp.Core
             // move motor Y+
             if (memory.KeyPressed == memory.Config.Up)
             {
-                memory.LogMessageStore.Enqueue("Y+");
+                memory.LogMessageQueue.Enqueue("Y+");
                 memory.Motor.Move(0, +memory.Config.StepsPerMillimiter_Y);
             }
 
             // move motor Y-
             if (memory.KeyPressed == memory.Config.Down)
             {
-                memory.LogMessageStore.Enqueue("Y-");
+                memory.LogMessageQueue.Enqueue("Y-");
                 memory.Motor.Move(0, -memory.Config.StepsPerMillimiter_Y);
             }
 
             // move motor X-
             if (memory.KeyPressed == memory.Config.Left)
             {
-                memory.LogMessageStore.Enqueue("X-");
+                memory.LogMessageQueue.Enqueue("X-");
                 memory.Motor.Move(-memory.Config.StepsPerMillimiter_X, 0);
             }
 
             // move motor X+
             if (memory.KeyPressed == memory.Config.Right)
             {
-                memory.LogMessageStore.Enqueue("X+");
+                memory.LogMessageQueue.Enqueue("X+");
                 memory.Motor.Move(+memory.Config.StepsPerMillimiter_X, 0);
             }
         }
