@@ -1,5 +1,4 @@
-﻿using ControllerApp.CustomEventArgs;
-using ControllerApp.Enums;
+﻿using ControllerApp.Enums;
 using ControllerApp.Helpers;
 using ControllerApp.Interfaces;
 using System;
@@ -63,8 +62,6 @@ namespace ControllerApp.Core
         public EmergencyReasons EmergencyReason { get; set; }
         public bool Alarm { get; set; }
         public AlarmReasons AlarmReason { get; set; }
-
-        public MessageSinkEventArgs MessageSink { get; set; }
 
         public Memory(IConfiguration Config)
         {
