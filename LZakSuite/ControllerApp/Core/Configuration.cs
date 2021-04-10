@@ -39,6 +39,8 @@ namespace ControllerApp.Core
         public ConsoleKey EnableManualOperation { get; set; }
         public ConsoleKey DisableManualOperation { get; set; }
 
+        public int MaxLogLineLength { get; set; }
+
         public Configuration()
         {
             // serial config
@@ -59,6 +61,8 @@ namespace ControllerApp.Core
             StepsPerMillimiter_Z = 10;
 
             WorkspaceMM = new PointF(100, 100);
+
+            MaxLogLineLength = 50;
 
             // Manual Control keys setup
             NoOperation = 0x00;
