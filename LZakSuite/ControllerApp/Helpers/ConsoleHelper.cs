@@ -4,11 +4,13 @@ using System.Runtime.InteropServices;
 
 namespace ControllerApp.Helpers
 {
-    public class ConsoleWriteHelper
+    public class ConsoleHelper
     {
-        public object LockObj;
+        private object LockObj;
 
-        public ConsoleWriteHelper(object LockObj)
+        Point LogAreaPosition = new Point(60, 15);
+
+        public ConsoleHelper(object LockObj)
         {
             if (LockObj is null) throw new Exception("null or invalid lock object");
             this.LockObj = LockObj;
@@ -40,7 +42,12 @@ namespace ControllerApp.Helpers
                 }
 
                 if (!writeOnLogArea) Console.SetCursorPosition(location.X, location.Y);
-                else Console.SetCursorPosition(60, 15);
+                else
+                {
+                    Console.SetCursorPosition(LogAreaPosition.X, LogAreaPosition.Y);
+                    Console.WriteLine(new string((char)32, Console.WindowWidth - LogAreaPosition.X));
+                    Console.SetCursorPosition(LogAreaPosition.X, LogAreaPosition.Y);
+                }
 
                 if (jumpLine) Console.WriteLine(text);
                 else Console.Write(text);
