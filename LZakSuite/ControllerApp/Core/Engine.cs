@@ -7,12 +7,12 @@ namespace ControllerApp.Core
 {
     public class Engine
     {
-        private Memory memory;
+        private Memory Memory;
 
         public Engine(IConfiguration Config)
         {
             if (Config is null) throw new ArgumentException("Invalid configuration.");
-            memory = new(Config);
+            Memory = new(Config);
             Console.CursorVisible = false;
         }
 
@@ -23,27 +23,29 @@ namespace ControllerApp.Core
         public void Run(string GCODE = null)
         {
             // if no gcode is provided, manual operation is automatically activated
-            if (GCODE is null) memory.ManualOperation = true;
+            if (GCODE is null) Memory.ManualOperation = true;
 
             // keep checking for serial communication
-            Task.Run(() => RuntimeResources.SerialKeepAlive(memory));
+            Task.Run(() => RuntimeResources.SerialKeepAlive(Memory));
 
             // keep listening for serial feedback, if available or possible
-            Task.Run(() => RuntimeResources.SerialListen(memory));
+            Task.Run(() => RuntimeResources.SerialListen(Memory));
+
+            Task.Run(() => RuntimeResources.MessageEventsListen(Memory));
 
             // run 
-            while (!memory.ShutdownToken.IsCancellationRequested)
+            while (!Memory.ShutdownToken.IsCancellationRequested)
             {
-                if (!memory.Serial.IsOpen) continue;
+                if (!Memory.Serial.IsOpen) continue;
 
-                if (memory.ManualOperation)
+                if (Memory.ManualOperation)
                 {
-                    RuntimeResources.ManualOperation(memory);
+                    RuntimeResources.ManualOperation(Memory);
                     Thread.Sleep(100);
                     continue;
                 }
 
-                RuntimeResources.ProcessGCODE(memory);
+                RuntimeResources.ProcessGCODE(Memory);
             }
         }
     }
