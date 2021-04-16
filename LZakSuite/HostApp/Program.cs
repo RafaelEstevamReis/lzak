@@ -1,4 +1,4 @@
-﻿using HostApp.Engine;
+﻿using HostApp.HostCore;
 using System;
 
 namespace HostApp
@@ -7,7 +7,7 @@ namespace HostApp
     {
         public static void Main(string[] args)
         {
-            Core c = new(new Configuration());
+            HostEngine c = new(new HostConfig());
             c.Progress += ImageProcessor_ReportPercentage;
             c.Run();
         }

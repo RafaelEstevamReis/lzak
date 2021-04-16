@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 
-namespace HostApp.Engine
+namespace HostApp.HostCore
 {
 
     public class ImageProcessor

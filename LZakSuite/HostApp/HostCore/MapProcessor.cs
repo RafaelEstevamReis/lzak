@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace HostApp.Engine
+namespace HostApp.HostCore
 {
     public static class MapProcessor
     {

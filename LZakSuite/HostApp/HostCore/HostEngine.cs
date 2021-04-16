@@ -1,23 +1,28 @@
-﻿using HostApp.Effects;
+﻿using ControllerApp.ControllerCore;
+using HostApp.Effects;
 using HostApp.Interfaces;
 using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 
-namespace HostApp.Engine
+namespace HostApp.HostCore
 {
-    public class Core
+    public class HostEngine
     {
         public event EventHandler<PercentageEventArgs> Progress;
 
         // Contains runtime stuff and configuration instance
         Memory Memory;
+        ControllerEngine ctrlEngine;
+        
 
-        public Core(IConfig Config)
+        public HostEngine(IHostConfig Config)
         {
             if (Config is null) throw new ArgumentNullException("No configuration provided.");
             Memory = new(Config);
+
+            ctrlEngine = new(new ControllerConfig());
         }
 
         public void Run()
@@ -35,9 +40,9 @@ namespace HostApp.Engine
             preloadChecks();
 
             // get BW image
-            var bwEffct = new Effects.SimpleBW();
-            bwEffct.Progress += Progress;
-            var map = Memory.CurrentImage.Apply(bwEffct)    // then, transform the image to black and white
+            var bwEffect = new SimpleBW();
+            bwEffect.Progress += Progress;
+            var map = Memory.CurrentImage.Apply(bwEffect)    // then, transform the image to black and white
                                                             //.Apply<Effects.SimpleBW>()
                                                             //.ApplySimpleBW()
                                          .ToBooleanArray(); // then, create an array of booleans: black = true; white = false.
@@ -45,7 +50,9 @@ namespace HostApp.Engine
             var gCode = new GCODEProcessor(Memory.Config)
                                           .ToGCODE(map);    // finally, transform said boolean array into GCODE.
 
-            gCode = gCode;
+
+            // Send generated GCODE to controller to handle movement
+            ctrlEngine.Run(gCode);
         }
 
         Image loadImageFile()

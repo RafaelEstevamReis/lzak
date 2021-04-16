@@ -1,9 +1,9 @@
 ﻿using HostApp.Interfaces;
 using System;
 
-namespace HostApp.Engine
+namespace HostApp.HostCore
 {
-    public class Configuration : IConfig
+    public class HostConfig : IHostConfig
     {
         // startup/image load config
         public bool AllowBitmap { get; }
@@ -31,9 +31,7 @@ namespace HostApp.Engine
                 pointsPerMM = value;
             }
         }
-
-
-        public Configuration()
+        public HostConfig()
         {
             AllowBitmap = true;
             AllowPNG = true;

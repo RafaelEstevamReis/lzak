@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HostApp.Engine
+namespace HostApp.HostCore
 {
     public class PercentageEventArgs : EventArgs
     {

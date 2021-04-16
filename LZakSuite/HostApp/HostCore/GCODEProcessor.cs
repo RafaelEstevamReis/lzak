@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace HostApp.Engine
+namespace HostApp.HostCore
 {
     public partial class GCODEProcessor
     {
-        public IConfig Config;
+        public IHostConfig Config;
         
-        public GCODEProcessor(IConfig Config)
+        public GCODEProcessor(IHostConfig Config)
         {
             if (Config is null) throw new ArgumentNullException("No configuration provided.");
             this.Config = Config;

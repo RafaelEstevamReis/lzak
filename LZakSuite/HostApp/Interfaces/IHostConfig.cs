@@ -2,7 +2,7 @@
 {
 
 
-    public interface IConfig 
+    public interface IHostConfig 
     {
         public bool AllowBitmap { get; }
         public bool AllowPNG { get; }
