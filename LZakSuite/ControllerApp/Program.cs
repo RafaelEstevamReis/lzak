@@ -1,6 +1,5 @@
-﻿using ControllerApp.Core;
-using System.IO;
-using System.IO.Ports;
+﻿using ControllerApp.ControllerCore;
+using System;
 
 namespace ControllerApp
 {
@@ -8,17 +7,7 @@ namespace ControllerApp
     {
         public static void Main(string[] args)
         {
-
-            //SerialPort cmm = new SerialPort("COM7", 9600);
-            //cmm.DtrEnable = true;
-            //cmm.Open();
-
-            //using (var ts = new StreamReader(cmm.BaseStream))
-            //{
-            //    while (true) System.Console.WriteLine(ts.ReadLine());
-            //}
-
-            var engine = new Engine(new Configuration());
+            var engine = new ControllerEngine(new ControllerConfig());
             engine.Run();
         }
     }
