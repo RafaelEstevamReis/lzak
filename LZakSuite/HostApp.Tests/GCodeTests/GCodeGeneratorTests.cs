@@ -1,4 +1,4 @@
-﻿using HostApp.Engine;
+﻿using HostApp.HostCore;
 using System;
 using Xunit;
 
@@ -11,7 +11,7 @@ namespace HostApp.Tests.GCodeTests
         {
             bool[,] map = new bool[10, 10];
 
-            var gcode = new GCODEProcessor(new Configuration()).ToGCODE(map);
+            var gcode = new GCODEProcessor(new HostConfig()).ToGCODE(map);
 
             Assert.Equal("", gcode);
         }
@@ -24,7 +24,7 @@ namespace HostApp.Tests.GCodeTests
             map[5, 0] = true;
             map[6, 0] = true;
 
-            var gcode = new GCODEProcessor(new Configuration()).ToGCODE(map);
+            var gcode = new GCODEProcessor(new HostConfig()).ToGCODE(map);
 
             Assert.Equal(@"G1 X3 Y0
 M3
@@ -41,7 +41,7 @@ M5
                 for (int y = 0; y < 5; y++) map[x, y] = true;
             }
             
-            var gcode = new GCODEProcessor(new Configuration()).ToGCODE(map);
+            var gcode = new GCODEProcessor(new HostConfig()).ToGCODE(map);
 
             Assert.Equal(@"G1 X0 Y0
 M3
@@ -82,7 +82,7 @@ M5
                 map[7, y] = true;
             }
             // 2 => de meio em meio mm
-            var gcode = new GCODEProcessor(new Configuration() 
+            var gcode = new GCODEProcessor(new HostConfig() 
             { Mode = OperationMode.ZMode, PointsPerMM = 1 })
             .ToGCODE(map);
 
@@ -145,7 +145,7 @@ G1 Z1.200
                 map[7, y] = true;
             }
             // 2 => de meio em meio mm
-            var gcode = new GCODEProcessor(new Configuration() { PointsPerMM = 1 })
+            var gcode = new GCODEProcessor(new HostConfig() { PointsPerMM = 1 })
             .ToGCODE(map);
 
             Assert.Equal(@"G1 X3 Y2
@@ -194,14 +194,14 @@ M5
         [Fact]
         public void GCODETests_PointsPerMillimetersIsZero()
         {
-            GCODEProcessor p = new GCODEProcessor(new Configuration());
+            GCODEProcessor p = new GCODEProcessor(new HostConfig());
             Assert.Throws<DivideByZeroException>(() => p.Config.PointsPerMM = 0);
         }
 
         [Fact]
         public void GCODETests_PointsPerMillimetersLessThanZero()
         {
-            GCODEProcessor p = new GCODEProcessor(new Configuration());
+            GCODEProcessor p = new GCODEProcessor(new HostConfig());
             Assert.Throws<ArgumentOutOfRangeException>(() => p.Config.PointsPerMM = -1);
         }
     }
