@@ -44,5 +44,18 @@ namespace ControllerApp.Helpers
         {
             return (float)steps / mmPerStep;
         }
+
+        public static float StringToFloat(this string value)
+        {
+            try
+            {
+                var nValue = Convert.ToSingle(value);
+                return (float)Math.Round(nValue, 2);
+            }
+            catch
+            {
+                return 0F;
+            }
+        }
     }
 }
