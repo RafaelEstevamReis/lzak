@@ -1,5 +1,4 @@
-﻿using HostApp.HostCore;
-using HostApp.Interfaces;
+﻿using HostApp.Interfaces;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,8 +8,6 @@ namespace HostApp.Effects
 {
     public class SimpleBW : IEffect
     {
-        public event EventHandler<PercentageEventArgs> Progress;
-
         public Image Process(Image image)
         {
             applyTransformation(image, c =>
@@ -26,28 +23,15 @@ namespace HostApp.Effects
         }
         private void saveOutputToFile(Image image)
         {
-            //using MemoryStream ms = new();
-            //image.Save(ms, ImageFormat.Jpeg);
-            //using FileStream fs = File.Create("out.jpg");
-            //fs.Write(ms.ToArray());
-
             using var fs = File.OpenWrite("out.jpg");
             image.Save(fs, ImageFormat.Jpeg);
         }
-
         void applyTransformation(Image image, Func<Color, Color> action)
         {
-            var args = new PercentageEventArgs() { Current = 0, Total = image.Height };
             var bmp = (Bitmap)image;
 
             for (int y = 0; y < image.Height; y++)
             {
-                if (Progress != null)
-                {
-                    args.Current = y;
-                    Progress(this, args);
-                }
-
                 for (int x = 0; x < image.Width; x++)
                 {
                     var c = bmp.GetPixel(x, y);

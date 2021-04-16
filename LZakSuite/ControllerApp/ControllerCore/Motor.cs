@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace ControllerApp.ControllerCore
 {
-    public class MotorInterface
+    public class Motor
     {
         Memory Memory;
-        public MotorInterface(Memory Memory) => this.Memory = Memory;
+        public Motor(Memory Memory) => this.Memory = Memory;
 
         // everything here is in mm
         public void MoveTo(float X, float Y)
@@ -33,21 +33,12 @@ namespace ControllerApp.ControllerCore
 
             Move_Steps(x_step, y_step);
         }
-
-        int stepXcount = 0;
-        int stepYcount = 0;
         public void Move_Steps(int X, int Y)
         {
             // UNITS!
             // mm - user interface values for input
             // steps - instructions to stepper motor
             // screen coordinates - user feedback (UI)
-
-            if (Memory.Alarm || Memory.Emergency) return;
-
-            // reset and stop solution for movement.
-            Memory.HaltKeyPressed = false;
-            Memory.ResetFirmwareKeyPressed = false;
 
             // current = 0, targets = xy
             int currentX = 0;
@@ -60,22 +51,11 @@ namespace ControllerApp.ControllerCore
 
             while (currentX != X || currentY != Y)
             {
-                RuntimeResources.KeyboardListener(Memory);
-
-                // has something happened? Immediately stops.
-                if (Memory.Emergency) break;
-                if (Memory.Alarm) break;
-                if (Memory.ShutdownToken.IsCancellationRequested) break;
-
-                // was reset key pressed?
-                if (Memory.ResetFirmwareKeyPressed)
+                if (Memory.Emergency || Memory.Alarm)
                 {
-                    Memory.Motor.ResetFirmware();
+                    Memory.Moving = false;
                     break;
                 }
-
-                // was stop key pressed (no reset)
-                if (Memory.HaltKeyPressed) return;
 
                 Step sX = Step.None;
                 Step sY = Step.None;
@@ -85,14 +65,12 @@ namespace ControllerApp.ControllerCore
                     currentX += dirX;
                     Memory.PositionSteps_X += dirX;
                     sX = dirX < 0 ? Step.StepLeft : Step.StepRight;
-                    stepXcount++;
                 }
                 if (currentY != Y)
                 {
                     currentY += dirY;
                     Memory.PositionSteps_Y += dirY;
                     sY = dirY < 0 ? Step.StepLeft : Step.StepRight;
-                    stepYcount++;
                 }
 
                 SendMoveSignal(sX, sY, Step.None);
@@ -123,9 +101,9 @@ namespace ControllerApp.ControllerCore
                 Memory.BinWriter.Flush();
 
                 // then wait a tad... 
-                if (Memory.MotorSpeed == MoveSpeed.Fast) return;
-                if (Memory.MotorSpeed == MoveSpeed.Medium) Thread.Sleep(1);
-                if (Memory.MotorSpeed == MoveSpeed.Slow) Thread.Sleep(150);
+                if (Memory.MotorSpeed == MoveSpeed.Fast) return; // Thread.Sleep(Memory.Config.FastMotorSpeedMs)
+                if (Memory.MotorSpeed == MoveSpeed.Medium) Thread.Sleep(Memory.Config.MediumMotorSpeedMs);
+                if (Memory.MotorSpeed == MoveSpeed.Slow) Thread.Sleep(Memory.Config.SlowMotorSpeedMs);
             }
             catch
             {

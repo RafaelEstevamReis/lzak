@@ -1,64 +1,40 @@
-﻿using ControllerApp.ControllerCore;
-using HostApp.Effects;
-using HostApp.Interfaces;
+﻿using HostApp.Effects;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 
 namespace HostApp.HostCore
 {
-    public class HostEngine
+    public class Core
     {
-        public event EventHandler<PercentageEventArgs> Progress;
-
-        // Contains runtime stuff and configuration instance
         Memory Memory;
-        ControllerEngine ctrlEngine;
         
-
-        public HostEngine(IHostConfig Config)
+        public Core(Config Config)
         {
             if (Config is null) throw new ArgumentNullException("No configuration provided.");
             Memory = new(Config);
-
-            ctrlEngine = new(new ControllerConfig());
         }
 
         public void Run()
         {
-            // first: get an image 
             Memory.CurrentImage = loadImageFile();
-
-            // second: see if its format is allowed or supported
             Memory.CurrentImageType = loadFileType();
-
-            // the, get its file extension as it's on the file name
             Memory.CurrentImageExtension = loadFileExtension();
-
-            // file verifications
+            
             preloadChecks();
-
-            // get BW image
+            
             var bwEffect = new SimpleBW();
-            bwEffect.Progress += Progress;
-            var map = Memory.CurrentImage.Apply(bwEffect)    // then, transform the image to black and white
-                                                            //.Apply<Effects.SimpleBW>()
-                                                            //.ApplySimpleBW()
-                                         .ToBooleanArray(); // then, create an array of booleans: black = true; white = false.
-
-            var gCode = new GCODEProcessor(Memory.Config)
-                                          .ToGCODE(map);    // finally, transform said boolean array into GCODE.
-
-
-            // Send generated GCODE to controller to handle movement
-            ctrlEngine.Run(gCode);
+            var map = Memory.CurrentImage.Apply(bwEffect)  
+                                         .ToBooleanArray();
+            
+            var gCode = new GCODETool(Memory.Config)
+                                          .ToGCODE(map);   
         }
 
-        Image loadImageFile()
+        ImageTool loadImageFile()
         {
             if (!File.Exists(Memory.Config.ImagePath)) throw new FileNotFoundException("Could not find image file.");
-            return Image.FromFile(Memory.Config.ImagePath);
+            return System.Drawing.Image.FromFile(Memory.Config.ImagePath);
         }
         ImageTypes loadFileType()
         {

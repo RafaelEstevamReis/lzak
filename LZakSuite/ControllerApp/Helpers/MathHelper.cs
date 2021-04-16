@@ -44,7 +44,6 @@ namespace ControllerApp.Helpers
         {
             return (float)steps / mmPerStep;
         }
-
         public static float StringToFloat(this string value)
         {
             try

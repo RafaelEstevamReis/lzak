@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HostApp\HostApp.csproj" />
+    <ProjectReference Include="..\HostApp\ImageProcessorApp.csproj" />
   </ItemGroup>
 
 </Project>

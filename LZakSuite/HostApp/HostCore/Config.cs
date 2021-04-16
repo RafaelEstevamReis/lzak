@@ -1,25 +1,18 @@
-﻿using HostApp.Interfaces;
-using System;
+﻿using System;
 
 namespace HostApp.HostCore
 {
-    public class HostConfig : IHostConfig
+    public class Config
     {
-        // startup/image load config
         public bool AllowBitmap { get; }
         public bool AllowPNG { get; }
         public bool AllowJPEG { get; }
         public string ImagePath { get; set; }
-
-        // GCODEProcessor configs
-        public OperationMode Mode { get; set; } = OperationMode.LaserMode;
-
-        public string LON_Command { get; set; } = "M3";
-        public string LOFF_Command { get; set; } = "M5";
-
-        public double ZON_HeigthMM { get; set; } = 0;
-        public double ZOFF_HeigthMM { get; set; } = 1.2;
-
+        public OperationMode Mode { get; set; } 
+        public string LON_Command { get; set; }
+        public string LOFF_Command { get; set; } 
+        public double ZON_HeigthMM { get; set; } 
+        public double ZOFF_HeigthMM { get; set; } 
         public int pointsPerMM;
         public int PointsPerMM
         {
@@ -31,20 +24,17 @@ namespace HostApp.HostCore
                 pointsPerMM = value;
             }
         }
-        public HostConfig()
+        public Config()
         {
             AllowBitmap = true;
             AllowPNG = true;
             AllowJPEG = true;
-
             Mode = OperationMode.LaserMode;
             LON_Command = "M3";
             LOFF_Command = "M5";
             ZON_HeigthMM = 0;
             ZOFF_HeigthMM = 1.2;
-
             pointsPerMM = 1;
-
             ImagePath = "pic2.jpg";
         }
     }

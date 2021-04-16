@@ -2,9 +2,9 @@
 
 namespace HostApp.HostCore
 {
-    public static class MapProcessor
+    public static class MapTool
     {
-        public static bool[,] ToBooleanArray(this Image image)
+        public static bool[,] ToBooleanArray(this System.Drawing.Image image)
         {
             bool[,] array = new bool[image.Width, image.Height];
             var bmp = (Bitmap)image;

@@ -1,16 +1,14 @@
-﻿using HostApp.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
 namespace HostApp.HostCore
 {
-    public partial class GCODEProcessor
+    public partial class GCODETool
     {
-        public IHostConfig Config;
+        public Config Config;
         
-        public GCODEProcessor(IHostConfig Config)
+        public GCODETool(Config Config)
         {
             if (Config is null) throw new ArgumentNullException("No configuration provided.");
             this.Config = Config;
@@ -30,7 +28,6 @@ namespace HostApp.HostCore
             }
             return sb.ToString();
         }
-
         private IEnumerable<string> getGCODE(bool[,] map)
         {
             var width = map.GetLength(0);
@@ -102,24 +99,6 @@ namespace HostApp.HostCore
             }
 
             yield break;
-        }
-
-        private void getAscii(bool[,] map)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            for (int x = 0; x < map.GetLength(0); x++)
-            {
-                for (int y = 0; y < map.GetLength(1); y++)
-                {
-                    sb.Append(map[x, y] ? "x" : " ");
-                }
-                sb.Append(Environment.NewLine);
-            }
-
-            string txt = sb.ToString();
-
-            File.WriteAllText("out.txt", txt);
         }
     }
 }
