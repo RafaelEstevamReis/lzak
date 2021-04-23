@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HostApp.HostCore
+namespace HostApp.Core
 {
     public partial class GCODETool
     {

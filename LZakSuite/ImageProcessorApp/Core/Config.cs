@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HostApp.HostCore
+namespace HostApp.Core
 {
     public class Config
     {
