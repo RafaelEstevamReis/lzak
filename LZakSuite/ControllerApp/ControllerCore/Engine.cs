@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ControllerApp.ControllerCore
 {
@@ -23,13 +21,7 @@ namespace ControllerApp.ControllerCore
             while (!Memory.ShutdownToken.IsCancellationRequested)
             {
                 SerialListen();
-
-                if (!Memory.Serial.IsOpen)
-                {
-                    Thread.Sleep(10);
-                    continue;
-                }
-
+                
                 // TODO future: manual commands will be here
                 // manual commands should generate GCODE to move
 
