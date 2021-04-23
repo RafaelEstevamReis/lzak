@@ -1,8 +1,8 @@
-﻿using HostApp.Interfaces;
+﻿using ImageProcessorApp.Interfaces;
 using System;
 using System.Drawing;
 
-namespace HostApp.Effects
+namespace ImageProcessorApp.Effects
 {
     public static class EffectExtensions
     {

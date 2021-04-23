@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 
-namespace HostApp.Core
+namespace ImageProcessorApp.Core
 {
 
     public class ImageTool

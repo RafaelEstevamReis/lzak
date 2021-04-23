@@ -1,4 +1,4 @@
-﻿namespace HostApp.Interfaces
+﻿namespace ImageProcessorApp.Interfaces
 {
     public interface IEffect
     {

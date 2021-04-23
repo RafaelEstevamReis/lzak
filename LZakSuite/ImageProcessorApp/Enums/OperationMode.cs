@@ -1,4 +1,4 @@
-﻿namespace HostApp
+﻿namespace ImageProcessorApp
 {
     public enum OperationMode
     {

@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace HostApp.Core
+namespace ImageProcessorApp.Core
 {
     public static class MapTool
     {

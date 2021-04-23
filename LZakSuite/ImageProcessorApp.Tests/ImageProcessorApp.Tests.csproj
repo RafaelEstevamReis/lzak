@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HostApp\ImageProcessorApp.csproj" />
+    <ProjectReference Include="..\ImageProcessorApp\ImageProcessorApp.csproj" />
   </ItemGroup>
 
 </Project>

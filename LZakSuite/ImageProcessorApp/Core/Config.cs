@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HostApp.Core
+namespace ImageProcessorApp.Core
 {
     public class Config
     {

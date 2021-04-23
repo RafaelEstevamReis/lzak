@@ -1,4 +1,5 @@
-﻿using HostApp.HostCore;
+﻿using ImageProcessorApp;
+using ImageProcessorApp.Core;
 using System;
 using Xunit;
 

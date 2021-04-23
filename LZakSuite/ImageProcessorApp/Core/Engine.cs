@@ -1,4 +1,5 @@
-﻿using HostApp.Effects;
+﻿using ImageProcessorApp.Effects;
+using ImageProcessorApp.Helper;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -8,30 +9,33 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 
-namespace HostApp.Core
+namespace ImageProcessorApp.Core
 {
     public class Engine
     {
         Memory Memory;
         string DefaultErrorMessage = "Something went wrong! I'm sorry about that.";
 
-        public Engine(FileInfo ImageFile, Config Config)
+        public Engine(Args ArgInfo, Config Config)
         {
             try
             {
                 if (Config is null) throw new ArgumentNullException("No configuration provided.");
+                if (ArgInfo is null) throw new ArgumentNullException("No parameters provided.");
                 Memory = new(Config);
 
-                if (!ImageFile.Exists) throw new ArgumentException($"Could not find file at {ImageFile.FullName}");
-                Memory.CurrentImage = Image.FromFile(ImageFile.FullName);
+                if (!ArgInfo.InputFile.Exists) throw new ArgumentException($"Could not find file at {ArgInfo.InputFile.FullName}");
+                Memory.CurrentImage = Image.FromFile(ArgInfo.InputFile.FullName);
 
+                Memory.CustomOutput = ArgInfo.HasCustomOutput;
+                Memory.OutputFile = ArgInfo.OutputFile;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(DefaultErrorMessage);
                 Console.WriteLine($"Error: {ex.Message}");
 
-                prettyExit(5);
+                GenericHelper.PrettyExit(5);
                 Environment.Exit(-1);
             }
         }
@@ -83,23 +87,9 @@ namespace HostApp.Core
             }
 
             Console.WriteLine(new string('-', 3));
-            prettyExit(5);
+            GenericHelper.PrettyExit(5);
         }
 
-        private void prettyExit(int timeout)
-        {
-            if (timeout > 10) timeout = 10;
-            Console.WriteLine();
-            var currY = Console.CursorTop;
-
-            for (int i = timeout; i > 0; i--)
-            {
-                Console.SetCursorPosition(0, currY);
-                Console.Write($"Exit in {i - 1} seconds... ");
-                Thread.Sleep(1000);
-            }
-            Console.WriteLine("Bye!");
-        }
         private string getEnumAttribute(ImageTypes currentImageType)
         {
             FieldInfo fi = Memory.CurrentImageType.GetType()

@@ -1,10 +1,10 @@
-﻿using HostApp.Interfaces;
+﻿using ImageProcessorApp.Interfaces;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 
-namespace HostApp.Effects
+namespace ImageProcessorApp.Effects
 {
     public class SimpleBW : IEffect
     {
