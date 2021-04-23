@@ -14,7 +14,6 @@ namespace ImageProcessorApp.Core
     public class Engine
     {
         Memory Memory;
-        string DefaultErrorMessage = "Something went wrong! I'm sorry about that.";
 
         public Engine(Args ArgInfo, Config Config)
         {
@@ -76,10 +75,9 @@ namespace ImageProcessorApp.Core
                 Console.WriteLine($"-> GCODE file: \"{savedFileName}\"");
                 Console.WriteLine(">> Done!");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(DefaultErrorMessage);
-                Console.WriteLine($"Error: {ex.Message}");
+                throw;
             }
 
             Console.WriteLine(new string('-', 3));
