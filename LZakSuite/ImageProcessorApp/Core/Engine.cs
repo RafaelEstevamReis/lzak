@@ -30,13 +30,9 @@ namespace ImageProcessorApp.Core
                 Memory.CustomOutput = ArgInfo.HasCustomOutput;
                 Memory.OutputFile = ArgInfo.OutputFile;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(DefaultErrorMessage);
-                Console.WriteLine($"Error: {ex.Message}");
-
-                GenericHelper.PrettyExit(5);
-                Environment.Exit(-1);
+                throw;
             }
         }
 

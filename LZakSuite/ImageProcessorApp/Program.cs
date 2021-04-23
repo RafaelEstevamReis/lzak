@@ -12,6 +12,7 @@ namespace ImageProcessorApp
             try
             {
                 var argObj = getArgs(args);
+                if (argObj is null) return;
 
                 var c = new Engine(argObj, new Config());
                 c.Run();
@@ -31,7 +32,11 @@ namespace ImageProcessorApp
             try
             {
                 if (args is null) throw new ArgumentException("No file path provided.");
-                if (args.Length == 0) throw new ArgumentException("You must provide a valid image file path.");
+                if (args.Length == 0)
+                {
+                    printHelp();
+                    return null;
+                }
 
                 for (int i = 0; i < args.Length; i++)
                 {
@@ -56,9 +61,6 @@ namespace ImageProcessorApp
                             break;
                         case "-help":
                         case "-h":
-                            printHelp();
-                            break;
-                        case "":
                             printHelp();
                             break;
                     }
@@ -88,7 +90,16 @@ namespace ImageProcessorApp
         private static void printHelp()
         {
             StringBuilder sb = new();
+            sb.AppendLine("No parameters provided.");
+            sb.AppendLine("HelpText here");
+            sb.AppendLine("HelpText here");
+            sb.AppendLine("HelpText here");
+            sb.AppendLine("HelpText here");
+            sb.AppendLine("HelpText here");
+            sb.AppendLine("HelpText here");
             sb.Append("HelpText here");
+
+            Console.WriteLine(sb.ToString());
         }
     }
 }
