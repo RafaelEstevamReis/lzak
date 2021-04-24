@@ -1,5 +1,7 @@
-﻿using ControllerApp.MathResources;
+﻿using ControllerApp.ControllerCore;
+using ControllerApp.MathResources;
 using System;
+using System.Linq;
 
 namespace ControllerApp.Helpers
 {
@@ -55,6 +57,43 @@ namespace ControllerApp.Helpers
             {
                 return 0F;
             }
+        }
+        public static bool TryGetCoordinates(string[] parts, Axis axis, out float result)
+        {
+            try
+            {
+                if (axis == Axis.X)
+                {
+                    return float.TryParse(parts.Where(o => o.Contains("X"))
+                                                   .FirstOrDefault()?
+                                                   .ToString()
+                                                   .Replace("X", ""), out result);
+                }
+
+                if (axis == Axis.Y)
+                {
+                    return float.TryParse(parts.Where(o => o.Contains("Y"))
+                                                    .FirstOrDefault()?
+                                                    .ToString()
+                                                    .Replace("Y", ""), out result);
+                }
+
+                if (axis == Axis.Z)
+                {
+                    return float.TryParse(parts.Where(o => o.Contains("Z"))
+                                                   .FirstOrDefault()?
+                                                   .ToString()
+                                                   .Replace("Z", ""), out result);
+                }
+            }
+            catch
+            {
+                result = 0F;
+                return false;
+            }
+
+            result = 0F;
+            return false;
         }
     }
 }

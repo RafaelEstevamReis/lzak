@@ -24,6 +24,8 @@ namespace ControllerApp.ControllerCore
         public EmergencyReasons EmergencyReason { get; set; }
         public bool Alarm { get; set; }
         public AlarmReasons AlarmReason { get; set; }
+        public FileInfo GCODEFile { get; internal set; }
+        public bool SpindleToggle { get; internal set; }
 
         public Memory(Config Config)
         {

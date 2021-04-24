@@ -1,5 +1,9 @@
-﻿using System;
+﻿using ControllerApp.Helpers;
+using System;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ControllerApp.ControllerCore
 {
@@ -7,10 +11,12 @@ namespace ControllerApp.ControllerCore
     {
         private Memory Memory;
 
-        public Engine(Config Config)
+        public Engine( Config Config, FileInfo GCODEFile = null)
         {
             if (Config is null) throw new ArgumentException("Invalid configuration.");
+
             Memory = new(Config);
+            Memory.GCODEFile = GCODEFile;
             Console.CursorVisible = false;
         }
         
@@ -20,12 +26,21 @@ namespace ControllerApp.ControllerCore
 
             while (!Memory.ShutdownToken.IsCancellationRequested)
             {
-                SerialListen();
-                
+                // SerialListen();
+
                 // TODO future: manual commands will be here
                 // manual commands should generate GCODE to move
 
-                var command = Console.ReadLine();
+                var command = string.Empty;
+
+                if(Memory.GCODEFile is null)
+                {
+                    Console.Write("Type in GCODE command: ");
+                    command = Console.ReadLine();
+                }
+
+                if (string.IsNullOrEmpty(command)) continue;
+
                 processCommand(command);
             }
         }
@@ -55,22 +70,65 @@ namespace ControllerApp.ControllerCore
                 catch { }
             }
         }
+
         private void processCommand(string command)
         {
             // TODO Process command
-
             if (command.StartsWith("G")) processGCODE(command);
             if (command.StartsWith("M")) processMCODE(command);
-
-            throw new NotImplementedException();
         }
         private void processMCODE(string command)
         {
-            throw new NotImplementedException();
+            command = command.Trim();
+
+            switch (command)
+            {
+                case "M3":
+                    Memory.SpindleToggle = true;
+                    break;
+                case "M5":
+                    Memory.SpindleToggle = false;
+                    break;
+            }
         }
         private void processGCODE(string command)
         {
-            throw new NotImplementedException();
+            command = command
+                      .Trim();
+
+            var parts = command
+                        .Split(" ");
+
+            if(parts.Length != 3)
+            {
+                Console.WriteLine("Error in command");
+                return;
+            }
+
+            bool ok = verifyCommands(parts);
+            float result_X = 0F;
+            float result_Y = 0F;
+
+            if(ok)
+            {
+                bool x_ok = MathHelper.TryGetCoordinates(parts, Axis.X, out result_X);
+                bool y_ok = MathHelper.TryGetCoordinates(parts, Axis.Y, out result_Y);
+
+                if (!x_ok) Console.WriteLine("x not ok");
+                if (!y_ok) Console.WriteLine("y not ok");
+            }
+        }
+
+        
+        private bool verifyCommands(string[] parts)
+        {
+            if (parts is null) return false;
+            if (parts.Length != 3) return false;
+            if (parts[0] != "G1") return false;
+            if (!parts[1].StartsWith("X")) return false;
+            if (!parts[2].StartsWith("Y")) return false;
+
+            return true;
         }
     }
 }

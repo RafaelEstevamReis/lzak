@@ -118,11 +118,6 @@ namespace ControllerApp.ControllerCore
         private void ResetFirmware()
         {
             // Forces disconnection to reset arduino.
-            // Since theres a thread running the method at
-            // <ControllerApp.Helpers.RuntimeHelper.SerialKeepAlive()>
-            // for restabilishing connection in case of failure,
-            // just disconnecting is enough. It'll reset and get it up again.
-
             Memory.Serial.Close();
         }
     }
