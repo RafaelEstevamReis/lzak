@@ -2,7 +2,7 @@
   "profiles": {
     "ImageProcessorApp": {
       "commandName": "Project",
-      "commandLineArgs": "-i D:\\GitHub\\lzak\\LZakSuite\\ImageProcessorApp\\bin\\Debug\\net5.0\\pic2.jpg -o test.g"
+      "commandLineArgs": "-i unnamed.png"
     }
   }
 }

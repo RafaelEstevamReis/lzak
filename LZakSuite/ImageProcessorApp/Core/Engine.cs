@@ -24,8 +24,9 @@ namespace ImageProcessorApp.Core
                 Memory = new(Config);
 
                 if (!ArgInfo.InputFile.Exists) throw new ArgumentException($"Could not find file at {ArgInfo.InputFile.FullName}");
-                Memory.CurrentImage = Image.FromFile(ArgInfo.InputFile.FullName);
 
+                Memory.CurrentImageFileDetails = ArgInfo.InputFile;
+                Memory.CurrentImage = Image.FromFile(ArgInfo.InputFile.FullName);
                 Memory.CustomOutput = ArgInfo.HasCustomOutput;
                 Memory.OutputFile = ArgInfo.OutputFile;
             }
@@ -71,7 +72,7 @@ namespace ImageProcessorApp.Core
                 Console.WriteLine(">> Done!");
 
                 Console.WriteLine("- Outputting GCODE file...");
-                saveOutputFile(Memory.Config.ImagePath, gCode, out string savedFileName);
+                saveOutputFile(Memory.CurrentImageFileDetails.FullName, gCode, out string savedFileName);
                 Console.WriteLine($"-> GCODE file: \"{savedFileName}\"");
                 Console.WriteLine(">> Done!");
             }
@@ -112,12 +113,12 @@ namespace ImageProcessorApp.Core
         }
         Image loadImageFile()
         {
-            if (!File.Exists(Memory.Config.ImagePath)) throw new FileNotFoundException("Could not find image file.");
-            return Image.FromFile(Memory.Config.ImagePath);
+            if (!Memory.CurrentImageFileDetails.Exists) throw new FileNotFoundException("Could not find image file.");
+            return Image.FromFile(Memory.CurrentImageFileDetails.FullName);
         }
         ImageTypes loadFileType()
         {
-            var file = File.ReadAllBytes(Memory.Config.ImagePath);
+            var file = File.ReadAllBytes(Memory.CurrentImageFileDetails.FullName);
             return checkFileHeaders(file);
         }
         ImageTypes checkFileHeaders(byte[] imageBytes)

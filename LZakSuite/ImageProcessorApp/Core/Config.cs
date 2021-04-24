@@ -7,7 +7,6 @@ namespace ImageProcessorApp.Core
         public bool AllowBitmap { get; }
         public bool AllowPNG { get; }
         public bool AllowJPEG { get; }
-        public string ImagePath { get; set; }
         public OperationMode Mode { get; set; } 
         public string LON_Command { get; set; }
         public string LOFF_Command { get; set; } 
@@ -35,7 +34,6 @@ namespace ImageProcessorApp.Core
             ZON_HeigthMM = 0;
             ZOFF_HeigthMM = 1.2;
             pointsPerMM = 1;
-            ImagePath = "pic2.jpg";
         }
     }
 }

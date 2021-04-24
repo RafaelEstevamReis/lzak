@@ -105,20 +105,21 @@ namespace ControllerApp.ControllerCore
                 return;
             }
 
-            bool ok = verifyCommands(parts);
+            bool commands_ok = verifyCommands(parts);
+
             float result_X = 0F;
             float result_Y = 0F;
-
-            if(ok)
+            if(commands_ok)
             {
                 bool x_ok = MathHelper.TryGetCoordinates(parts, Axis.X, out result_X);
                 bool y_ok = MathHelper.TryGetCoordinates(parts, Axis.Y, out result_Y);
 
-                if (!x_ok) Console.WriteLine("x not ok");
-                if (!y_ok) Console.WriteLine("y not ok");
+                if(x_ok && y_ok)
+                {
+
+                }
             }
         }
-
         
         private bool verifyCommands(string[] parts)
         {

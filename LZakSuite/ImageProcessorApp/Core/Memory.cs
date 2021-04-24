@@ -10,6 +10,7 @@ namespace ImageProcessorApp.Core
         public ImageTypes CurrentImageType { get; set; }
         public bool CustomOutput { get; internal set; }
         public FileInfo OutputFile { get; internal set; }
+        public FileInfo CurrentImageFileDetails { get; internal set; }
 
         public Memory(Config Config) => this.Config = Config;
     }
