@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 
 namespace ImageProcessorApp.Core
 {
@@ -16,15 +14,9 @@ namespace ImageProcessorApp.Core
                 return Color.FromArgb(gray, gray, gray);
             });
 
-            // for debug purposes
-            saveOutputToFile(image);
             return image;
         }
-        private void saveOutputToFile(Image image)
-        {
-            using var fs = File.OpenWrite("out.jpg");
-            image.Save(fs, ImageFormat.Jpeg);
-        }
+        
         void applyTransformation(Image image, Func<Color, Color> action)
         {
             var bmp = (Bitmap)image;

@@ -44,7 +44,7 @@ namespace ImageProcessorApp.Core
                 Console.WriteLine(new string('-', 46));
                 Console.WriteLine();
 
-                Console.WriteLine("- Loading image...");
+                Console.WriteLine($"- Loading image from {Memory.CurrentImageFileDetails.FullName}...");
                 Memory.CurrentImage = loadImageFile();
                 Console.WriteLine(">> Done!");
 
@@ -72,8 +72,7 @@ namespace ImageProcessorApp.Core
                 Console.WriteLine(">> Done!");
 
                 Console.WriteLine("- Outputting GCODE file...");
-                saveOutputFile(Memory.CurrentImageFileDetails.FullName, gCode, out string savedFileName);
-                Console.WriteLine($"-> GCODE file: \"{savedFileName}\"");
+                saveTextOutputFile(gCode, Memory.CustomOutput ? Memory.OutputFile.FullName : "out.g");
                 Console.WriteLine(">> Done!");
             }
             catch (Exception)
@@ -96,20 +95,10 @@ namespace ImageProcessorApp.Core
 
             return attr.Description;
         }
-        private void saveOutputFile(string originalFile, string gCode, out string savedFileName)
+        private void saveTextOutputFile(string contents, string fileName = null)
         {
-            var root = new FileInfo(originalFile).Name
-                                                 .Split('.')
-                                                 .ToArray();
-
-            StringBuilder sb = new();
-            sb.Append(string.Join("", root.SkipLast(1)
-                                          .ToArray()));
-            sb.Append(".g");
-
-            savedFileName = sb.ToString();
-
-            File.WriteAllText(savedFileName, gCode);
+            if (!File.Exists(fileName)) fileName = "out.g";
+            File.WriteAllText(fileName, contents);
         }
         Image loadImageFile()
         {
