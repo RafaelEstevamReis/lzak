@@ -97,7 +97,7 @@ namespace ImageProcessorApp.Core
         }
         private void saveTextOutputFile(string contents, string fileName = null)
         {
-            if (!File.Exists(fileName)) fileName = "out.g";
+            if (File.Exists(fileName)) fileName = "out.g";
             File.WriteAllText(fileName, contents);
         }
         Image loadImageFile()
