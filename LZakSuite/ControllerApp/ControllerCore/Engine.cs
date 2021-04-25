@@ -1,9 +1,10 @@
-﻿using ControllerApp.Helpers;
+﻿using ControllerApp.Enums;
+using ControllerApp.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ControllerApp.ControllerCore
 {
@@ -11,7 +12,7 @@ namespace ControllerApp.ControllerCore
     {
         private Memory Memory;
 
-        public Engine( Config Config, FileInfo GCODEFile = null)
+        public Engine(Config Config, FileInfo GCODEFile = null)
         {
             if (Config is null) throw new ArgumentException("Invalid configuration.");
 
@@ -19,10 +20,31 @@ namespace ControllerApp.ControllerCore
             Memory.GCODEFile = GCODEFile;
             Console.CursorVisible = false;
         }
-        
+
         public void Run()
         {
+            Console.WriteLine($"Connecting to serial port at {Memory.Config.SerialCOMPort}...");
             SerialConnect();
+
+            if (!Memory.Serial.IsOpen)
+            { 
+                Console.WriteLine($"Unable to connect to {Memory.Config.SerialCOMPort}!. Check your connections.");
+                return;
+            }
+
+            Console.WriteLine($"Connected to port {Memory.Config.SerialCOMPort}!");
+
+            bool fromFile = false;
+            string[] commands = null;
+
+            if(Memory.GCODEFile is not null)
+            {
+                Console.WriteLine($"Running on GCODE file input mode...");
+                fromFile = true;
+                commands = getCommandsFromFile(Memory.GCODEFile).ToArray();
+            }
+
+            if(!fromFile) Console.WriteLine($"GCODE file provided at {Memory.GCODEFile.FullName}...");
 
             while (!Memory.ShutdownToken.IsCancellationRequested)
             {
@@ -31,19 +53,40 @@ namespace ControllerApp.ControllerCore
                 // TODO future: manual commands will be here
                 // manual commands should generate GCODE to move
 
-                var command = string.Empty;
-
-                if(Memory.GCODEFile is null)
+                if (!fromFile)
                 {
                     Console.Write("Type in GCODE command: ");
-                    command = Console.ReadLine();
+                    var command = Console.ReadLine();
+                    if(string.IsNullOrEmpty(command)) continue;
+                    processCommand(command);
+                    continue;
                 }
 
-                if (string.IsNullOrEmpty(command)) continue;
+                Console.WriteLine("Processing commands...");
+                foreach(var cmd in commands)
+                {
+                    Console.WriteLine(cmd);
+                    processCommand(cmd);
+                }
 
-                processCommand(command);
+                Console.WriteLine("Done! Press a key to quit.");
+                Console.ReadKey();
+                break;
             }
         }
+
+        private IEnumerable<string> getCommandsFromFile(FileInfo gCODEFile)
+        {
+            if (!gCODEFile.Exists) yield return default;
+
+            var file = File.ReadAllLines(gCODEFile.FullName);
+
+            foreach(var l in file)
+            {
+                yield return l;
+            }
+        }
+
         private void SerialConnect()
         {
             Memory.Serial.Open();
@@ -93,41 +136,34 @@ namespace ControllerApp.ControllerCore
         }
         private void processGCODE(string command)
         {
-            command = command
-                      .Trim();
-
-            var parts = command
-                        .Split(" ");
-
-            if(parts.Length != 3)
-            {
-                Console.WriteLine("Error in command");
-                return;
-            }
-
+            command = command.Trim();
+            var parts = command.Split(" ");
             bool commands_ok = verifyCommands(parts);
 
-            float result_X = 0F;
-            float result_Y = 0F;
-            if(commands_ok)
+            if (commands_ok)
             {
-                bool x_ok = MathHelper.TryGetCoordinates(parts, Axis.X, out result_X);
-                bool y_ok = MathHelper.TryGetCoordinates(parts, Axis.Y, out result_Y);
+                bool x_ok = MathHelper.TryGetCoordinates(parts, Axis.X, out float result_X);
+                bool y_ok = MathHelper.TryGetCoordinates(parts, Axis.Y, out float result_Y);
+                bool z_ok = MathHelper.TryGetCoordinates(parts, Axis.Y, out float result_Z);
 
-                if(x_ok && y_ok)
+                if (!x_ok || !y_ok || !z_ok)
                 {
-
+                    Console.WriteLine("Error in command. Type in again.");
+                    return;
                 }
+
+                Memory.Motor.MoveTo(result_X, result_Y);
             }
         }
-        
+
         private bool verifyCommands(string[] parts)
         {
             if (parts is null) return false;
-            if (parts.Length != 3) return false;
+            if (parts.Length < 3 || parts.Length > 5) return false;
             if (parts[0] != "G1") return false;
             if (!parts[1].StartsWith("X")) return false;
             if (!parts[2].StartsWith("Y")) return false;
+            if (parts.Length > 3 && !parts[3].StartsWith("Z")) return false;
 
             return true;
         }

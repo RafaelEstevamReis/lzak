@@ -1,4 +1,4 @@
-﻿using ControllerApp.ControllerCore;
+﻿using ControllerApp.Enums;
 using ControllerApp.MathResources;
 using System;
 using System.Linq;

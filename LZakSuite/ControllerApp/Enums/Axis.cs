@@ -1,4 +1,4 @@
-﻿namespace ControllerApp.ControllerCore
+﻿namespace ControllerApp.Enums
 {
     public enum Axis
     {

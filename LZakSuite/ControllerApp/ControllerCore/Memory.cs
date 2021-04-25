@@ -17,6 +17,7 @@ namespace ControllerApp.ControllerCore
         public bool Moving { get; set; } 
         public int PositionSteps_X { get; set; }
         public int PositionSteps_Y { get; set; }
+        public int PositionSteps_Z { get; internal set; }
         public Motor Motor { get; private set; }
         public MoveSpeed MotorSpeed { get; set; }
         public PointF DestinationPosition { get; set; }

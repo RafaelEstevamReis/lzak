@@ -36,6 +36,11 @@ namespace ControllerApp.ControllerCore
             StepsPerMillimiter_Y = 20;
             StepsPerMillimiter_Z = 1;
             WorkspaceMM = new PointF(100, 100);
+
+            FastMotorSpeedMs = 0;
+            SlowMotorSpeedMs = 200;
+            FastMotorSpeedMs = 100;
+            DefaultMotorSpeed = MoveSpeed.Medium;
         }
     }
 }

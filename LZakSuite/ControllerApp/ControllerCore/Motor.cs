@@ -49,6 +49,9 @@ namespace ControllerApp.ControllerCore
 
             Memory.Moving = true;
 
+            bool wasRight = false;
+            bool wasLeft = false;
+
             while (currentX != X || currentY != Y)
             {
                 if (Memory.Emergency || Memory.Alarm)
@@ -59,6 +62,7 @@ namespace ControllerApp.ControllerCore
 
                 Step sX = Step.None;
                 Step sY = Step.None;
+                Step sZ = Step.None;
 
                 if (currentX != X)
                 {
@@ -73,7 +77,33 @@ namespace ControllerApp.ControllerCore
                     sY = dirY < 0 ? Step.StepLeft : Step.StepRight;
                 }
 
-                SendMoveSignal(sX, sY, Step.None);
+                switch (Memory.SpindleToggle)
+                {
+                    case true:
+                        if (wasLeft)
+                        {
+                            sZ = Step.None;
+                            break;
+                        }
+
+                        sZ = Step.StepLeft;
+                        wasLeft = true;
+                        wasRight = false;
+                        break;
+                    case false:
+                        if (wasRight)
+                        {
+                            sZ = Step.None;
+                            break;
+                        }
+
+                        sZ = Step.StepRight;
+                        wasLeft = false;
+                        wasRight = true;
+                        break;
+                }
+
+                SendMoveSignal(sX, sY, sZ);
             }
 
             Memory.Moving = false;

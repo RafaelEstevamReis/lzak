@@ -8,7 +8,7 @@ namespace ControllerApp
     {
         public static void Main(string[] args)
         {
-            FileInfo GCODEFile = null;//new FileInfo(args[0]);
+            FileInfo GCODEFile = new FileInfo(args[0]);
 
             var engine = new Engine(new Config(), GCODEFile);
             engine.Run();
