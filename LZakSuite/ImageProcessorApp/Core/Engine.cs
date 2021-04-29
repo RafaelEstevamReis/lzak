@@ -38,47 +38,40 @@ namespace ImageProcessorApp.Core
 
         public void Run()
         {
-            try
-            {
-                Console.WriteLine("LZAK - IMAGE PIXEL MAPPING AND GCODE PROCESSOR");
-                Console.WriteLine(new string('-', 46));
-                Console.WriteLine();
 
-                Console.WriteLine($"- Loading image from {Memory.CurrentImageFileDetails.FullName}...");
-                Memory.CurrentImage = loadImageFile();
-                Console.WriteLine(">> Done!");
+            Console.WriteLine("LZAK - IMAGE PIXEL MAPPING AND GCODE PROCESSOR");
+            Console.WriteLine(new string('-', 46));
+            Console.WriteLine();
 
-                Memory.CurrentImageType = loadFileType();
-                Console.WriteLine($"- Image type: {getEnumAttribute(Memory.CurrentImageType)}");
+            Console.WriteLine($"- Loading image from {Memory.CurrentImageFileDetails.FullName}...");
+            Memory.CurrentImage = loadImageFile();
+            Console.WriteLine(">> Done!");
 
-                Console.WriteLine("- Verifying file details...");
-                preloadChecks();
-                Console.WriteLine(">> Done!");
+            Memory.CurrentImageType = loadFileType();
+            Console.WriteLine($"- Image type: {getEnumAttribute(Memory.CurrentImageType)}");
 
-                Console.WriteLine(new string('-', 3));
+            Console.WriteLine("- Verifying file details...");
+            preloadChecks();
+            Console.WriteLine(">> Done!");
 
-                var bwEffect = new SimpleBW();
-                Console.WriteLine("- Applying effect \"Black and White\"...");
-                var bw = Memory.CurrentImage.Apply(bwEffect);
-                Console.WriteLine(">> Done!");
+            Console.WriteLine(new string('-', 3));
 
-                Console.WriteLine("- Mapping pixels...");
-                var map = bw.ToBooleanArray();
-                Console.WriteLine(">> Done!");
+            var bwEffect = new SimpleBW();
+            Console.WriteLine("- Applying effect \"Black and White\"...");
+            var bw = Memory.CurrentImage.Apply(bwEffect);
+            Console.WriteLine(">> Done!");
 
-                Console.WriteLine("- Generating GCODE...");
-                var gCode = new GCODETool(Memory.Config)
-                                              .ToGCODE(map);
-                Console.WriteLine(">> Done!");
+            Console.WriteLine("- Mapping pixels...");
+            var map = bw.ToBooleanArray();
+            Console.WriteLine(">> Done!");
 
-                Console.WriteLine("- Outputting GCODE file...");
-                saveTextOutputFile(gCode, Memory.CustomOutput ? Memory.OutputFile.FullName : "out.g");
-                Console.WriteLine(">> Done!");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            Console.WriteLine("- Generating GCODE...");
+            var gCode = new GCODETool(Memory.Config).ToGCODE(map);
+            Console.WriteLine(">> Done!");
+
+            Console.WriteLine($"- Outputting GCODE file to {Memory.OutputFile.FullName}...");
+            saveTextOutputFile(gCode, Memory.CustomOutput ? Memory.OutputFile.FullName : $"out{new Random().Next(0, 10000000)}.g");
+            Console.WriteLine(">> Done!");
 
             Console.WriteLine(new string('-', 3));
             GenericHelper.PrettyExit(5);
@@ -87,7 +80,7 @@ namespace ImageProcessorApp.Core
         private string getEnumAttribute(ImageTypes currentImageType)
         {
             FieldInfo fi = Memory.CurrentImageType.GetType()
-                                                  .GetField(Memory.CurrentImageType
+                                                  .GetField(currentImageType
                                                                   .ToString());
 
             var attr = fi.GetCustomAttributes(typeof(DescriptionAttribute), false)
@@ -97,7 +90,6 @@ namespace ImageProcessorApp.Core
         }
         private void saveTextOutputFile(string contents, string fileName = null)
         {
-            if (File.Exists(fileName)) fileName = "out.g";
             File.WriteAllText(fileName, contents);
         }
         Image loadImageFile()

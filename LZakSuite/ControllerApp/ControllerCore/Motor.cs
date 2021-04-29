@@ -85,7 +85,6 @@ namespace ControllerApp.ControllerCore
                             sZ = Step.None;
                             break;
                         }
-
                         sZ = Step.StepLeft;
                         wasLeft = true;
                         wasRight = false;
@@ -96,7 +95,6 @@ namespace ControllerApp.ControllerCore
                             sZ = Step.None;
                             break;
                         }
-
                         sZ = Step.StepRight;
                         wasLeft = false;
                         wasRight = true;
@@ -131,6 +129,8 @@ namespace ControllerApp.ControllerCore
                 Memory.BinWriter.Flush();
 
                 // then wait a tad... 
+                Thread.Sleep(10);
+
                 if (Memory.MotorSpeed == MoveSpeed.Fast) return; // Thread.Sleep(Memory.Config.FastMotorSpeedMs)
                 if (Memory.MotorSpeed == MoveSpeed.Medium) Thread.Sleep(Memory.Config.MediumMotorSpeedMs);
                 if (Memory.MotorSpeed == MoveSpeed.Slow) Thread.Sleep(Memory.Config.SlowMotorSpeedMs);

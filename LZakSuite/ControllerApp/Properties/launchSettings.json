@@ -2,7 +2,7 @@
   "profiles": {
     "ControllerApp": {
       "commandName": "Project",
-      "commandLineArgs": "D:\\GitHub\\lzak\\LZakSuite\\ImageProcessorApp\\bin\\Debug\\net5.0\\pic2.g"
+      "commandLineArgs": "-h"
     }
   }
 }

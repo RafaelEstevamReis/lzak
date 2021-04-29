@@ -29,54 +29,40 @@ namespace ImageProcessorApp
             string outputPath = string.Empty;
             bool customOutput = false;
 
-            try
-            {
-                if (args is null) throw new ArgumentException("No file path provided.");
-                if (args.Length == 0)
-                {
-                    printHelp();
-                    return null;
-                }
 
-                for (int i = 0; i < args.Length; i++)
+            if (args is null) throw new ArgumentException("No file path provided.");
+            if (args.Length == 0)
+            {
+                printHelp();
+                return null;
+            }
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i])
                 {
-                    switch (args[i])
-                    {
-                        case "-i":
-                            if (args[i + 1] is null)
-                            {
-                                inputPath = string.Empty;
-                                break;
-                            }
-                            inputPath = args[i + 1];
+                    case "-i":
+                        if (args[i + 1] is null)
+                        {
+                            inputPath = string.Empty;
                             break;
-                        case "-o":
-                            if (args[i + 1] is null)
-                            {
-                                outputPath = string.Empty;
-                                break;
-                            }
-                            customOutput = true;
-                            outputPath = args[i + 1];
+                        }
+                        inputPath = args[i + 1];
+                        break;
+                    case "-o":
+                        if (args[i + 1] is null)
+                        {
+                            outputPath = string.Empty;
                             break;
-                        case "-help":
-                        case "-h":
-                            printHelp();
-                            break;
-                    }
+                        }
+                        customOutput = true;
+                        outputPath = args[i + 1];
+                        break;
+                    case "-help":
+                    case "-h":
+                        printHelp();
+                        return null;
                 }
-            }
-            catch (FileLoadException)
-            {
-                throw;
-            }
-            catch (IndexOutOfRangeException ex)
-            {
-                throw new IndexOutOfRangeException("Incorrect parameter provided.", ex.InnerException);
-            }
-            catch (Exception)
-            {
-                throw;
             }
 
             return new Args()
@@ -90,14 +76,14 @@ namespace ImageProcessorApp
         private static void printHelp()
         {
             StringBuilder sb = new();
-            sb.AppendLine("No parameters provided.");
-            sb.AppendLine("HelpText here");
-            sb.AppendLine("HelpText here");
-            sb.AppendLine("HelpText here");
-            sb.AppendLine("HelpText here");
-            sb.AppendLine("HelpText here");
-            sb.AppendLine("HelpText here");
-            sb.Append("HelpText here");
+            sb.AppendLine("Image processing application for LZakSuite");
+            sb.AppendLine();
+            sb.AppendLine("Usage: [input parameter:required] [input arguments:required] [output parameter:optional] [output parameter:optional]");
+            sb.AppendLine();
+            sb.AppendLine("No parameter: this help text.");
+            sb.AppendLine("-h or -help: this help text");
+            sb.AppendLine("-i [path] (required): path to source image.");
+            sb.AppendLine("-o [path] (optional): path to destination GCODE file.");
 
             Console.WriteLine(sb.ToString());
         }

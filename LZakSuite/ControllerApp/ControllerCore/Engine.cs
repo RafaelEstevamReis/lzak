@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace ControllerApp.ControllerCore
 {
@@ -44,11 +45,11 @@ namespace ControllerApp.ControllerCore
                 commands = getCommandsFromFile(Memory.GCODEFile).ToArray();
             }
 
-            if(!fromFile) Console.WriteLine($"GCODE file provided at {Memory.GCODEFile.FullName}...");
+            if(!fromFile) Console.WriteLine($"Running on user input mode.");
 
             while (!Memory.ShutdownToken.IsCancellationRequested)
             {
-                // SerialListen();
+                SerialListen();
 
                 // TODO future: manual commands will be here
                 // manual commands should generate GCODE to move
@@ -67,6 +68,7 @@ namespace ControllerApp.ControllerCore
                 {
                     Console.WriteLine(cmd);
                     processCommand(cmd);
+                    Thread.Sleep(10);
                 }
 
                 Console.WriteLine("Done! Press a key to quit.");
@@ -78,13 +80,8 @@ namespace ControllerApp.ControllerCore
         private IEnumerable<string> getCommandsFromFile(FileInfo gCODEFile)
         {
             if (!gCODEFile.Exists) yield return default;
-
             var file = File.ReadAllLines(gCODEFile.FullName);
-
-            foreach(var l in file)
-            {
-                yield return l;
-            }
+            foreach(var l in file) yield return l;
         }
 
         private void SerialConnect()
@@ -133,6 +130,8 @@ namespace ControllerApp.ControllerCore
                     Memory.SpindleToggle = false;
                     break;
             }
+
+            Memory.Motor.MoveTo(Memory.PositionSteps_X, Memory.PositionSteps_Y);
         }
         private void processGCODE(string command)
         {
