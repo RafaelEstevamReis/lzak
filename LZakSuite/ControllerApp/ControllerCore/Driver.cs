@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace ControllerApp.ControllerCore
 {
-    public class Motor
+    public class Driver
     {
         Memory Memory;
-        public Motor(Memory Memory) => this.Memory = Memory;
+        public Driver(Memory Memory) => this.Memory = Memory;
 
         // everything here is in mm
         public void MoveTo(float X, float Y)

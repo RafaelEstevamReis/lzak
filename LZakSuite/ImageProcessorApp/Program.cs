@@ -58,7 +58,7 @@ namespace ImageProcessorApp
                         customOutput = true;
                         outputPath = args[i + 1];
                         break;
-                    case "-help":
+                    case "--help":
                     case "-h":
                         printHelp();
                         return null;

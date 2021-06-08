@@ -48,7 +48,7 @@ namespace ControllerApp
                             }
                             inputPath = args[i + 1];
                             break;
-                        case "-help":
+                        case "--help":
                         case "-h":
                             printHelp();
                             exit = true;
