@@ -4,7 +4,8 @@
 // e-mail: isaac.guimaraescandido@gmail.com
 
 #define FW_VERSION 3
-#define FW_REVSION 6
+#define FW_REVISION 6
+#define FW_MINOR_VERSION 0
 
 #define X_DIRECTION_PIN 0
 #define X_STEP_PIN 1
@@ -20,9 +21,9 @@
 #define Z_DIRECTION_VALUE 0b00010000 // decimal: 16
 #define Z_STEP_VALUE 0b00100000 // decimal: 32 
 
-#define DELAY_BETWEEN_COMMANDS 50 //ms
+#define DELAY_BETWEEN_COMMANDS 50 // ms
 
-#define BAUD_RATE 115200 // bits per second (BPS)
+#define BAUD_RATE 19200 // bits per second (BPS)
 
 #define ENABLE_MOTORS_PIN 8 // pin for powering up motors
 
@@ -48,7 +49,9 @@ void showGreetings()
     Serial.print("---LZakFw v");
     Serial.print(FW_VERSION);
     Serial.print(".");
-    Serial.print(FW_REVSION);
+    Serial.print(FW_REVISION);
+    Serial.print(".");
+    Serial.print(FW_MINOR_VERSION);
     Serial.println("---");
     Serial.println("by Isaac Candido (isaac.guimaraescandido@gmail.com)");
     Serial.print("Baud rate: ");
@@ -63,7 +66,6 @@ void setup()
     pinMode(Y_ENDSTOP, INPUT);
     pinMode(Z_ENDSTOP, INPUT);
     
-  
     pinMode(ENABLE_MOTORS_PIN, OUTPUT);
     digitalWrite(ENABLE_MOTORS_PIN, LOW);
     
