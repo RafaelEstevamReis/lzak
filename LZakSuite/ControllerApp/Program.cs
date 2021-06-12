@@ -13,7 +13,7 @@ namespace ControllerApp
             {
                 var GCODEFile = processArgs(args, out bool exit);
 
-                if (exit) return;
+                //if (exit) return;
 
                 if (GCODEFile is null) Console.WriteLine("Failed to load GCODE file. Will start on user input mode.");
 
