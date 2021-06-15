@@ -23,7 +23,7 @@
 
 #define DELAY_BETWEEN_COMMANDS 50 // ms
 
-#define BAUD_RATE 19200 // bits per second (BPS)
+#define BAUD_RATE 14400 // bits per second (BPS)
 
 #define ENABLE_MOTORS_PIN 8 // pin for powering up motors
 
@@ -69,8 +69,8 @@ void setup()
     pinMode(ENABLE_MOTORS_PIN, OUTPUT);
     digitalWrite(ENABLE_MOTORS_PIN, LOW);
     
-    liftAlarm();
-    liftEmergency();
+    // liftAlarm();
+    // liftEmergency();
     
     showGreetings();
 }
@@ -138,11 +138,13 @@ void liftAlarm()
 
 void NotifyEmergencyStatus()
 {
+  return;
   Serial.write(Emergency);
 }
 
 void NotifyAlarmStatus()
 {
+  return;
   Serial.write(Alarm);
 }
 
@@ -230,13 +232,20 @@ void processCommand(Instruction receivedCommands[])
 
 void loop()
 {
+  return;
+
+
     IsAnyEndstopActivated();
     
     if(Serial.available() <= 0) return;
     
     int receivedCommand = Serial.read();
 
-    if ((receivedCommand < 0b01000000) && !AnyReasonNotToMove())
+    Serial.write(receivedCommand);
+
+    return;
+    
+    if ((receivedCommand < 0b01000000))// && !AnyReasonNotToMove())
     { 
       Instruction resultArray[3];
       resultArray[X] = getInstruction(receivedCommand, X);
