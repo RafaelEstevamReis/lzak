@@ -4,7 +4,7 @@
 // e-mail: isaac.guimaraescandido@gmail.com
 
 #define FW_VERSION 3
-#define FW_REVISION 6
+#define FW_REVISION 7
 #define FW_MINOR_VERSION 0
 
 #define X_DIRECTION_PIN 5
@@ -247,5 +247,8 @@ void loop()
         return;
     }
     
-    OtherCommands(receivedCommand);
+    if(receivedCommand < 200) 
+    {   
+        OtherCommands(receivedCommand);
+    }
 }
