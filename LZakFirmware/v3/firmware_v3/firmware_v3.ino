@@ -7,25 +7,31 @@
 #define FW_REVISION 6
 #define FW_MINOR_VERSION 0
 
-#define X_DIRECTION_PIN 0
-#define X_STEP_PIN 1
-#define Y_DIRECTION_PIN 2
+#define X_DIRECTION_PIN 5
+#define X_STEP_PIN 2
+#define Y_DIRECTION_PIN 6
 #define Y_STEP_PIN 3
-#define Z_DIRECTION_PIN 4
-#define Z_STEP_PIN 5
+#define Z_DIRECTION_PIN 7
+#define Z_STEP_PIN 4
 
-#define X_DIRECTION_VALUE 0b00000001 // decimal: 1
-#define X_STEP_VALUE 0b00000010 // decimal: 2
-#define Y_DIRECTION_VALUE 0b00000100 // decimal: 4
-#define Y_STEP_VALUE 0b00001000 // decimal: 8
-#define Z_DIRECTION_VALUE 0b00010000 // decimal: 16
-#define Z_STEP_VALUE 0b00100000 // decimal: 32 
+#define X_DIRECTION_VALUE 0b00000001 
+#define X_STEP_VALUE 0b00000010
+#define Y_DIRECTION_VALUE 0b00000100
+#define Y_STEP_VALUE 0b00001000
+#define Z_DIRECTION_VALUE 0b00010000
+#define Z_STEP_VALUE 0b00100000
 
-#define DELAY_BETWEEN_COMMANDS 50 // ms
-
-#define BAUD_RATE 14400 // bits per second (BPS)
-
+#define DELAY_BETWEEN_COMMANDS 1 // time in milliseconds
 #define ENABLE_MOTORS_PIN 8 // pin for powering up motors
+#define BAUD_RATE 38400 // communication speed.
+
+#define CMD_LIFT_EMERGENCY 64
+#define CMD_LIFT_ALARM 65
+#define CMD_SET_EMERGENCY 66
+#define CMD_SET_ALARM 67
+#define CMD_HEALTH_CHECK_PING_PONG 68
+#define CMD_ENABLE_MOTORS 68
+#define CMD_DISABLE_MOTORS 68
 
 #define X_ENDSTOP 9 // pin for X axis endstop
 #define Y_ENDSTOP 10 // pin for Y axis endstop
@@ -44,6 +50,31 @@ EmergencyReasons Emergency;
 bool EmergencyModeActivated;
 bool AlarmModeActivated;
 
+void setup()
+{
+    Serial.begin(BAUD_RATE);
+
+    pinMode(X_ENDSTOP, INPUT);
+    pinMode(Y_ENDSTOP, INPUT);
+    pinMode(Z_ENDSTOP, INPUT);
+
+    pinMode(X_STEP_PIN, OUTPUT);
+    pinMode(Y_STEP_PIN, OUTPUT);
+    pinMode(Z_STEP_PIN, OUTPUT);
+
+    pinMode(X_DIRECTION_PIN, OUTPUT);
+    pinMode(Y_DIRECTION_PIN, OUTPUT);
+    pinMode(Z_DIRECTION_PIN, OUTPUT);
+
+    pinMode(ENABLE_MOTORS_PIN, OUTPUT);
+    digitalWrite(ENABLE_MOTORS_PIN, LOW);
+
+    liftAlarm();
+    liftEmergency();
+
+    showGreetings();
+}
+
 void showGreetings()
 {
     Serial.print("---LZakFw v");
@@ -53,171 +84,136 @@ void showGreetings()
     Serial.print(".");
     Serial.print(FW_MINOR_VERSION);
     Serial.println("---");
-    Serial.println("by Isaac Candido (isaac.guimaraescandido@gmail.com)");
+    Serial.println("by Isaac Candido");
+    Serial.println("(isaac.guimaraescandido@gmail.com)");
     Serial.print("Baud rate: ");
     Serial.println(BAUD_RATE);
 }
 
-void setup()
+void OtherCommands(int command)
 {
-    Serial.begin(BAUD_RATE);
-    
-    pinMode(X_ENDSTOP, INPUT);
-    pinMode(Y_ENDSTOP, INPUT);
-    pinMode(Z_ENDSTOP, INPUT);
-    
-    pinMode(ENABLE_MOTORS_PIN, OUTPUT);
-    digitalWrite(ENABLE_MOTORS_PIN, LOW);
-    
-    // liftAlarm();
-    // liftEmergency();
-    
-    showGreetings();
-}
+    // lift emergency mode (64 + 0)
+    if ((command & 0b00100000) > 0) liftEmergency();
 
-void OtherCommands(int command) 
-{ 
-  // lift emergency mode (64 + 0)
-  if(command & 0b01000000)
-  {
-    liftEmergency();
-  }
-  
-  // lift alarm mode (64 + 1)
-  if(command & 0b01000001)
-  {
-    liftAlarm();
-  }
-  
-  // set emergency mode (64 + 2)
-  if(command & 0b01000010)
-  {
-    setEmergency(UserEmergency);
-  }
-  
-  // set alarm mode (64 + 3)
-  if(command & 0b01000011)
-  {
-    setAlarm(UserAlarm);
-  }
-  
-  // respond to ping (64 + 4)
-  if(command & 0b01000100)
-  {
-    Serial.println("Pong!");
-  }
+    // lift alarm mode (64 + 1)
+    if ((command & 0b00100001) > 0) liftAlarm();
+
+    // set emergency mode (64 + 2)
+    if ((command & 0b00100010) > 0) setEmergency(UserEmergency);
+
+    // set alarm mode (64 + 3)
+    if ((command & 0b00100011) > 0) setAlarm(UserAlarm);
+
+    // respond to ping (64 + 4)
+    if ((command & 0b00100100) > 0) Serial.println("Pong");
+
+    // disable Motors (64 + 5)
+    if ((command & 0b00100101) > 0) digitalWrite(ENABLE_MOTORS_PIN, HIGH);
+
+    // enable Motors (64 + 6)
+    if ((command & 0b00100110) > 0) digitalWrite(ENABLE_MOTORS_PIN, LOW);
 }
 
 void setEmergency(EmergencyReasons reason)
 {
-  Emergency = reason;
-  EmergencyModeActivated = true;
-  NotifyEmergencyStatus();
+    Emergency = reason;
+    EmergencyModeActivated = true;
+    NotifyEmergencyStatus();
 }
 
 void setAlarm(AlarmReasons reason)
 {
-  Alarm = reason;
-  AlarmModeActivated = true;
-  NotifyAlarmStatus();
+    Alarm = reason;
+    AlarmModeActivated = true;
+    NotifyAlarmStatus();
 }
 
 void liftEmergency()
 {
-  Emergency = NoEmergency;
-  EmergencyModeActivated = false;
-  NotifyEmergencyStatus();
+    Emergency = NoEmergency;
+    EmergencyModeActivated = false;
+    NotifyEmergencyStatus();
 }
 
 void liftAlarm()
 {
-  Alarm = NoAlarm;
-  AlarmModeActivated = false;
-  NotifyAlarmStatus();
+    Alarm = NoAlarm;
+    AlarmModeActivated = false;
+    NotifyAlarmStatus();
 }
 
 void NotifyEmergencyStatus()
 {
-  return;
-  Serial.write(Emergency);
+    Serial.write(Emergency);
 }
 
 void NotifyAlarmStatus()
 {
-  return;
-  Serial.write(Alarm);
+    Serial.write(Alarm);
 }
 
 bool AnyReasonNotToMove()
 {
-  if((Alarm == NoAlarm) && 
-     (Emergency == NoEmergency) &&
-     (EmergencyModeActivated) &&
-     (AlarmModeActivated)) 
-     {
-       return false;
-     }
+    if (Alarm != NoAlarm) return true;
+    if (Emergency != NoEmergency) return true;
+    if (EmergencyModeActivated) return true;
+    if (AlarmModeActivated) return true;
 
-  return true;
+    return false;
 }
 
 bool IsAnyEndstopActivated()
 {
-  if(digitalRead(X_ENDSTOP) > 0 ||
-     digitalRead(Y_ENDSTOP) > 0 ||
-     digitalRead(Z_ENDSTOP) > 0)
-  {
-      setEmergency(EndstopActivated);
-      return true;
-  }
-  
-  return false;
+    if (digitalRead(X_ENDSTOP) > 0) return true;
+    if (digitalRead(Y_ENDSTOP) > 0) return true;
+    if (digitalRead(Z_ENDSTOP) > 0) return true;
+    return false;
 }
 
 Instruction getInstruction(int command, Axis axis)
 {
-    Instruction result = { };
+    Instruction result { };
 
-    if (axis == X)
+    if(axis == X)
     {
-        (command & X_DIRECTION_VALUE) > 0 ? result.Direction = true : result.Direction = false;
-        (command & X_STEP_VALUE) > 0 ? result.Step = true : result.Step = false;
+      result.Direction = (command & 0b0000001) > 0;
+      result.Step = (command & 0b00000010) > 0;
     }
 
-    if (axis == Y)
+    if(axis == Y)
     {
-        (command & Y_DIRECTION_VALUE) > 0 ? result.Direction = true : result.Direction = false;
-        (command & Y_STEP_VALUE) > 0 ? result.Step = true : result.Step = false;
+      result.Direction = (command & 0b00000100) > 0;
+      result.Step = (command & 0b00001000) > 0; 
     }
 
-    if (axis == Z)
+    if(axis == Z)
     {
-        (command & Z_DIRECTION_VALUE) > 0 ? result.Direction = true : result.Direction = false;
-        (command & Z_STEP_VALUE) > 0 ? result.Step = true : result.Step = false;
+      result.Direction = (command & 0b0010000) > 0;
+      result.Step = (command & 0b00100000) > 0;
     }
-
+    
     return result;
 }
 
 void setDirection(Instruction receivedCommands[])
 {
-    digitalWrite(X_DIRECTION_PIN, receivedCommands[X].Direction);
-    digitalWrite(Y_DIRECTION_PIN, receivedCommands[Y].Direction);
-    digitalWrite(Z_DIRECTION_PIN, receivedCommands[Z].Direction);
+    digitalWrite(X_DIRECTION_PIN, receivedCommands[X].Direction ? HIGH : LOW);
+    digitalWrite(Y_DIRECTION_PIN, receivedCommands[Y].Direction ? HIGH : LOW);
+    digitalWrite(Z_DIRECTION_PIN, receivedCommands[Z].Direction ? HIGH : LOW);
 }
 
 void sendStepSignal(Instruction receivedCommands[])
 {
-    digitalWrite(X_STEP_PIN, receivedCommands[X].Step);
-    digitalWrite(Y_STEP_PIN, receivedCommands[Y].Step);
-    digitalWrite(Z_STEP_PIN, receivedCommands[Z].Step);
+    digitalWrite(X_STEP_PIN, receivedCommands[X].Step ? HIGH : LOW);
+    digitalWrite(Y_STEP_PIN, receivedCommands[Y].Step ? HIGH : LOW);
+    digitalWrite(Z_STEP_PIN, receivedCommands[Z].Step ? HIGH : LOW);
 }
 
-void sendResetSignal(Instruction receivedCommands[])
+void sendResetSignal()
 {
-    digitalWrite(X_STEP_PIN, receivedCommands[X].Step);
-    digitalWrite(Y_STEP_PIN, receivedCommands[Y].Step);
-    digitalWrite(Z_STEP_PIN, receivedCommands[Z].Step);
+    digitalWrite(X_STEP_PIN, LOW);
+    digitalWrite(Y_STEP_PIN, LOW);
+    digitalWrite(Z_STEP_PIN, LOW);
 }
 
 void processCommand(Instruction receivedCommands[])
@@ -226,37 +222,30 @@ void processCommand(Instruction receivedCommands[])
     delay(DELAY_BETWEEN_COMMANDS);
     sendStepSignal(receivedCommands);
     delay(DELAY_BETWEEN_COMMANDS);
-    sendResetSignal(receivedCommands);
+    sendResetSignal();
     delay(DELAY_BETWEEN_COMMANDS);
 }
 
 void loop()
 {
-  return;
+    //if(IsAnyEndstopActivated()) setEmergency(EndstopActivated);
 
+    if (Serial.available() <= 0) return;
 
-    IsAnyEndstopActivated();
-    
-    if(Serial.available() <= 0) return;
-    
     int receivedCommand = Serial.read();
 
-    Serial.write(receivedCommand);
-
-    return;
-    
-    if ((receivedCommand < 0b01000000))// && !AnyReasonNotToMove())
-    { 
-      Instruction resultArray[3];
-      resultArray[X] = getInstruction(receivedCommand, X);
-      resultArray[Y] = getInstruction(receivedCommand, Y);
-      resultArray[Z] = getInstruction(receivedCommand, Z);
-  
-      processCommand(resultArray);
-    }
-    
-    if(receivedCommand >= 0b01000000)
+    if (receivedCommand < 64)// && !AnyReasonNotToMove())
     {
-      OtherCommands(receivedCommand);
+        Instruction resultArray[3];
+
+        resultArray[X] = getInstruction(receivedCommand, X);
+        resultArray[Y] = getInstruction(receivedCommand, Y);
+        resultArray[Z] = getInstruction(receivedCommand, Z);
+
+        processCommand(resultArray);
+
+        return;
     }
+    
+    OtherCommands(receivedCommand);
 }
